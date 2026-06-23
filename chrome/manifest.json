@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "VX Link Helper V3",
+  "version": "3.0",
+  "description": "Copy VX links with tracking cleanup (Chrome MV3 port)",
+  "permissions": [
+    "contextMenus",
+    "clipboardWrite",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "*://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "128": "icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.x.com/*",
+        "*://*.twitter.com/*",
+        "*://*.bilibili.com/*",
+        "*://*.reddit.com/*",
+        "*://*.pixiv.net/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
