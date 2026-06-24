@@ -1,5 +1,53 @@
 (function(){
 
+// Translations
+const TRANSLATIONS = {
+    en: {
+        toastCopied: "Copied VX Link",
+        btnVX: "VX"
+    },
+    zh: {
+        toastCopied: "已复制 VX 链接",
+        btnVX: "VX"
+    }
+};
+
+// Default settings
+const DEFAULT_SETTINGS = {
+    language: "system"
+};
+
+// Current language strings
+let strings = TRANSLATIONS.en;
+
+// Get system language
+function getSystemLanguage() {
+    const browserLang = navigator.language || navigator.userLanguage;
+    if (browserLang.startsWith("zh")) {
+        return "zh";
+    }
+    return "en";
+}
+
+// Get current language from storage
+function getCurrentLanguage() {
+    return new Promise((resolve) => {
+        chrome.storage.sync.get(["language"], (result) => {
+            let lang = (result && result.language) || DEFAULT_SETTINGS.language;
+            if (lang === "system") {
+                lang = getSystemLanguage();
+            }
+            resolve(lang);
+        });
+    });
+}
+
+// Update translations based on stored language
+async function updateLanguage() {
+    const language = await getCurrentLanguage();
+    strings = TRANSLATIONS[language] || TRANSLATIONS.en;
+}
+
 // Settings cache
 let settings = {
     sites: {
@@ -38,14 +86,19 @@ function loadSettings() {
 
 // Listen for settings changes and re-run injection logic
 chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName === "sync" && changes.sites) {
-        settings.sites = {
-            x: changes.sites.newValue?.x !== undefined ? changes.sites.newValue.x : settings.sites.x,
-            reddit: changes.sites.newValue?.reddit !== undefined ? changes.sites.newValue.reddit : settings.sites.reddit,
-            bilibili: changes.sites.newValue?.bilibili !== undefined ? changes.sites.newValue.bilibili : settings.sites.bilibili,
-            pixiv: changes.sites.newValue?.pixiv !== undefined ? changes.sites.newValue.pixiv : settings.sites.pixiv
-        };
-        run();
+    if (areaName === "sync") {
+        if (changes.sites) {
+            settings.sites = {
+                x: changes.sites.newValue?.x !== undefined ? changes.sites.newValue.x : settings.sites.x,
+                reddit: changes.sites.newValue?.reddit !== undefined ? changes.sites.newValue.reddit : settings.sites.reddit,
+                bilibili: changes.sites.newValue?.bilibili !== undefined ? changes.sites.newValue.bilibili : settings.sites.bilibili,
+                pixiv: changes.sites.newValue?.pixiv !== undefined ? changes.sites.newValue.pixiv : settings.sites.pixiv
+            };
+            run();
+        }
+        if (changes.language) {
+            updateLanguage().then(run);
+        }
     }
 });
 
@@ -123,8 +176,8 @@ async function copyCurrent(){
     );
 
     toast(
-        "已复制 VX 链接"
-    );
+            strings.toastCopied
+        );
 }
 
 function toast(msg){
@@ -264,11 +317,11 @@ function injectX(){
                     "button"
                 );
 
-            b.textContent = "VX";
+            b.textContent = strings.btnVX;
 
-            b.setAttribute(
-                "data-vxbtn",
-                "1"
+                        b.setAttribute(
+                            "data-vxbtn",
+                            "1"
             );
 
             b.style.cssText = `
@@ -312,8 +365,8 @@ function injectX(){
                         );
 
                     toast(
-                        "已复制 VX 链接"
-                    );
+                            strings.toastCopied
+                        );
                 }
             );
 
@@ -388,7 +441,7 @@ function injectBili(){
     if(text){
 
         text.textContent =
-            "VX";
+                    strings.btnVX;
 
     }
 
@@ -448,7 +501,7 @@ function injectReddit(){
     }
 
     const b =
-        makeBtn("VX");
+        makeBtn(strings.btnVX);
 
     b.setAttribute(
         "data-rxbtn",
@@ -484,7 +537,7 @@ function injectPixiv(){
     }
 
     const b =
-        makeBtn("VX");
+        makeBtn(strings.btnVX);
 
     b.setAttribute(
         "data-phbtn",
@@ -537,8 +590,11 @@ function run(){
     }
 }
 
-// Load settings first, then initialize observers and run
-loadSettings().then(() => {
+// Load settings and language first, then initialize observers and run
+Promise.all([
+    loadSettings(),
+    updateLanguage()
+]).then(() => {
     new MutationObserver(
         run
     ).observe(
