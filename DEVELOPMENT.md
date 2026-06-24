@@ -19,7 +19,7 @@ To prevent duplicate code, this extension uses a shared source system:
 
 ---
 
-## 🛠️ Building the Extension
+## 🛠️ Building & Cleaning the Extension
 
 To run or distribute the extensions, you must sync the shared source code to the browser-specific folders.
 
@@ -34,6 +34,17 @@ To run or distribute the extensions, you must sync the shared source code to the
         ```cmd
         build.cmd
         ```
+
+### Cleaning Up Generated Files
+To remove the copied files from the browser-specific directories (leaving only the source manifests), run the platform-specific clean script:
+*   **macOS / Linux**:
+    ```bash
+    ./clean.sh
+    ```
+*   **Windows**:
+    ```cmd
+    clean.cmd
+    ```
 
 ---
 

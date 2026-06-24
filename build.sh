@@ -1,4 +1,9 @@
 #!/bin/bash
+# Automatically clean previous build products
+if [ -f "./clean.sh" ]; then
+    ./clean.sh
+fi
+
 echo "Building VXLinkShare extensions..."
 
 # Ensure target directories exist

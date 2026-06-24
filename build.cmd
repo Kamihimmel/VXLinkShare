@@ -1,4 +1,7 @@
 @echo off
+rem Automatically clean previous build products
+if exist clean.cmd call clean.cmd
+
 echo Building VXLinkShare extensions...
 
 if not exist chrome mkdir chrome
