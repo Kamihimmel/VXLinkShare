@@ -70,7 +70,12 @@ function getSystemLanguage() {
 function getCurrentLanguage() {
     return new Promise((resolve) => {
         chrome.storage.sync.get(["language"], (result) => {
-            let lang = result.language || DEFAULT_SETTINGS.language;
+            if (chrome.runtime.lastError) {
+                console.error("Error getting language:", chrome.runtime.lastError);
+                resolve(DEFAULT_SETTINGS.language);
+                return;
+            }
+            let lang = (result && result.language) || DEFAULT_SETTINGS.language;
             if (lang === "system") {
                 lang = getSystemLanguage();
             }
@@ -83,6 +88,12 @@ function getCurrentLanguage() {
 function loadSettings() {
     return new Promise((resolve) => {
         chrome.storage.sync.get(null, (result) => {
+            if (chrome.runtime.lastError) {
+                console.error("Error loading settings:", chrome.runtime.lastError);
+                resolve(DEFAULT_SETTINGS);
+                return;
+            }
+            
             const settings = result || {};
             
             // Merge with defaults to ensure all properties exist
@@ -103,8 +114,15 @@ function loadSettings() {
 
 // Save settings to storage
 function saveSettings(settings) {
-    return new Promise((resolve) => {
-        chrome.storage.sync.set(settings, resolve);
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.set(settings, () => {
+            if (chrome.runtime.lastError) {
+                console.error("Error saving settings:", chrome.runtime.lastError);
+                reject(chrome.runtime.lastError);
+            } else {
+                resolve();
+            }
+        });
     });
 }
 
@@ -191,66 +209,90 @@ async function showStatus(message) {
 // Site toggle handlers - save immediately
 function attachCheckboxListeners() {
     document.getElementById("site-x").addEventListener("change", async () => {
-        const settings = await loadSettings();
-        settings.sites.x = document.getElementById("site-x").checked;
-        await saveSettings(settings);
-        const language = await getCurrentLanguage();
-        const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
-        await showStatus(strings.savedSuccess);
+        try {
+            const settings = await loadSettings();
+            settings.sites.x = document.getElementById("site-x").checked;
+            await saveSettings(settings);
+            const language = await getCurrentLanguage();
+            const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
+            await showStatus(strings.savedSuccess);
+        } catch (error) {
+            console.error("Error saving site-x setting:", error);
+        }
     });
 
     document.getElementById("site-reddit").addEventListener("change", async () => {
-        const settings = await loadSettings();
-        settings.sites.reddit = document.getElementById("site-reddit").checked;
-        await saveSettings(settings);
-        const language = await getCurrentLanguage();
-        const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
-        await showStatus(strings.savedSuccess);
+        try {
+            const settings = await loadSettings();
+            settings.sites.reddit = document.getElementById("site-reddit").checked;
+            await saveSettings(settings);
+            const language = await getCurrentLanguage();
+            const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
+            await showStatus(strings.savedSuccess);
+        } catch (error) {
+            console.error("Error saving site-reddit setting:", error);
+        }
     });
 
     document.getElementById("site-bilibili").addEventListener("change", async () => {
-        const settings = await loadSettings();
-        settings.sites.bilibili = document.getElementById("site-bilibili").checked;
-        await saveSettings(settings);
-        const language = await getCurrentLanguage();
-        const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
-        await showStatus(strings.savedSuccess);
+        try {
+            const settings = await loadSettings();
+            settings.sites.bilibili = document.getElementById("site-bilibili").checked;
+            await saveSettings(settings);
+            const language = await getCurrentLanguage();
+            const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
+            await showStatus(strings.savedSuccess);
+        } catch (error) {
+            console.error("Error saving site-bilibili setting:", error);
+        }
     });
 
     document.getElementById("site-pixiv").addEventListener("change", async () => {
-        const settings = await loadSettings();
-        settings.sites.pixiv = document.getElementById("site-pixiv").checked;
-        await saveSettings(settings);
-        const language = await getCurrentLanguage();
-        const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
-        await showStatus(strings.savedSuccess);
+        try {
+            const settings = await loadSettings();
+            settings.sites.pixiv = document.getElementById("site-pixiv").checked;
+            await saveSettings(settings);
+            const language = await getCurrentLanguage();
+            const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
+            await showStatus(strings.savedSuccess);
+        } catch (error) {
+            console.error("Error saving site-pixiv setting:", error);
+        }
     });
 }
 
 // Reset button handler
 document.getElementById("reset-button").addEventListener("click", async () => {
     if (confirm("Are you sure you want to reset to default settings?")) {
-        await saveSettings(DEFAULT_SETTINGS);
-        await displaySettings();
-        const language = await getCurrentLanguage();
-        const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
-        await showStatus(strings.resetSuccess);
-        await updateUILanguage();
+        try {
+            await saveSettings(DEFAULT_SETTINGS);
+            await displaySettings();
+            const language = await getCurrentLanguage();
+            const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
+            await showStatus(strings.resetSuccess);
+            await updateUILanguage();
+        } catch (error) {
+            console.error("Error resetting settings:", error);
+        }
     }
 });
 
 // Language change handler
 document.getElementById("language").addEventListener("change", async () => {
-    const selectedLanguage = document.getElementById("language").value;
-    
-    // Get current settings and update language
-    const settings = await loadSettings();
-    settings.language = selectedLanguage;
-    await saveSettings(settings);
-    
-    // Update UI immediately with selected language
-    const displayLanguage = selectedLanguage === "system" ? getSystemLanguage() : selectedLanguage;
-    await updateUILanguage(displayLanguage);
+    try {
+        const selectedLanguage = document.getElementById("language").value;
+        
+        // Get current settings and update language
+        const settings = await loadSettings();
+        settings.language = selectedLanguage;
+        await saveSettings(settings);
+        
+        // Update UI immediately with selected language
+        const displayLanguage = selectedLanguage === "system" ? getSystemLanguage() : selectedLanguage;
+        await updateUILanguage(displayLanguage);
+    } catch (error) {
+        console.error("Error changing language:", error);
+    }
 });
 
 // Initialize page - display settings FIRST, then listeners will be attached by displaySettings
