@@ -161,7 +161,7 @@ const VX = {
                 u.hostname = "vxtwitter.com";
                 u.searchParams.delete("t"); // Strip t for X/Twitter specifically
             } else if (h === "reddit.com") {
-                u.hostname = "rxddit.com";
+                u.hostname = "vxreddit.com";
             } else if (h === "pixiv.net") {
                 u.hostname = "phixiv.net";
             } else if (h === "bilibili.com" || h.endsWith(".bilibili.com") || h === "b23.tv") {
