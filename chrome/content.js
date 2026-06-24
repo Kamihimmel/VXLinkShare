@@ -435,7 +435,7 @@ function injectPixiv(){
     }
 
     const b =
-        makeBtn("PH");
+        makeBtn("VX");
 
     b.setAttribute(
         "data-phbtn",
