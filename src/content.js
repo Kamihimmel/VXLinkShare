@@ -1,52 +1,7 @@
 (function(){
 
-// Translations
-const TRANSLATIONS = {
-    en: {
-        toastCopied: "Copied VX Link",
-        btnVX: "VX"
-    },
-    zh: {
-        toastCopied: "已复制 VX 链接",
-        btnVX: "VX"
-    }
-};
-
-// Default settings
-const DEFAULT_SETTINGS = {
-    language: "system"
-};
-
 // Current language strings
-let strings = TRANSLATIONS.en;
-
-// Get system language
-function getSystemLanguage() {
-    const browserLang = navigator.language || navigator.userLanguage;
-    if (browserLang.startsWith("zh")) {
-        return "zh";
-    }
-    return "en";
-}
-
-// Get current language from storage
-function getCurrentLanguage() {
-    return new Promise((resolve) => {
-        chrome.storage.sync.get(["language"], (result) => {
-            let lang = (result && result.language) || DEFAULT_SETTINGS.language;
-            if (lang === "system") {
-                lang = getSystemLanguage();
-            }
-            resolve(lang);
-        });
-    });
-}
-
-// Update translations based on stored language
-async function updateLanguage() {
-    const language = await getCurrentLanguage();
-    strings = TRANSLATIONS[language] || TRANSLATIONS.en;
-}
+let strings = VX.getStrings("en");
 
 // Settings cache
 let settings = {
@@ -58,41 +13,28 @@ let settings = {
     }
 };
 
+// Update translations based on stored language
+async function updateLanguage() {
+    const language = await VX.getCurrentLanguage();
+    strings = VX.getStrings(language);
+}
+
 // Load settings from storage
-function loadSettings() {
-    return new Promise((resolve) => {
-        chrome.storage.sync.get(null, (result) => {
-            const defaults = {
-                sites: {
-                    x: true,
-                    reddit: true,
-                    bilibili: true,
-                    pixiv: true
-                }
-            };
-            
-            settings = {
-                sites: {
-                    x: result?.sites?.x !== undefined ? result.sites.x : defaults.sites.x,
-                    reddit: result?.sites?.reddit !== undefined ? result.sites.reddit : defaults.sites.reddit,
-                    bilibili: result?.sites?.bilibili !== undefined ? result.sites.bilibili : defaults.sites.bilibili,
-                    pixiv: result?.sites?.pixiv !== undefined ? result.sites.pixiv : defaults.sites.pixiv
-                }
-            };
-            resolve();
-        });
-    });
+async function loadSettings() {
+    const s = await VX.loadSettings();
+    settings.sites = s.sites;
 }
 
 // Listen for settings changes and re-run injection logic
 chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === "sync") {
         if (changes.sites) {
+            const defaults = VX.DEFAULT_SETTINGS.sites;
             settings.sites = {
-                x: changes.sites.newValue?.x !== undefined ? changes.sites.newValue.x : settings.sites.x,
-                reddit: changes.sites.newValue?.reddit !== undefined ? changes.sites.newValue.reddit : settings.sites.reddit,
-                bilibili: changes.sites.newValue?.bilibili !== undefined ? changes.sites.newValue.bilibili : settings.sites.bilibili,
-                pixiv: changes.sites.newValue?.pixiv !== undefined ? changes.sites.newValue.pixiv : settings.sites.pixiv
+                x: changes.sites.newValue?.x !== undefined ? changes.sites.newValue.x : defaults.x,
+                reddit: changes.sites.newValue?.reddit !== undefined ? changes.sites.newValue.reddit : defaults.reddit,
+                bilibili: changes.sites.newValue?.bilibili !== undefined ? changes.sites.newValue.bilibili : defaults.bilibili,
+                pixiv: changes.sites.newValue?.pixiv !== undefined ? changes.sites.newValue.pixiv : defaults.pixiv
             };
             run();
         }
@@ -102,82 +44,14 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     }
 });
 
-function convert(url){
-
-    try{
-
-        const u = new URL(url, location.href);
-
-        u.hash = "";
-
-        const h =
-            u.hostname.replace(
-                /^www\./,
-                ""
-            );
-
-        [
-            "spm_id_from",
-            "from_spmid",
-            "vd_source",
-            "share_source",
-            "share_medium",
-            "share_plat",
-            "share_session_id",
-            "share_tag",
-            "unique_k",
-            "timestamp",
-            "bbid",
-            "s",
-            "t",
-            "mx",
-            "ref_src"
-        ].forEach(
-            p => u.searchParams.delete(p)
-        );
-
-        if(
-            h === "x.com" ||
-            h === "twitter.com"
-        ){
-            u.hostname = "vxtwitter.com";
-        }
-        else if(
-            h === "reddit.com"
-        ){
-            u.hostname = "vxreddit.com";
-        }
-        else if(
-            h === "pixiv.net"
-        ){
-            u.hostname = "phixiv.net";
-        }
-        else if(
-            h === "bilibili.com" ||
-            h.endsWith(".bilibili.com") ||
-            h === "b23.tv"
-        ){
-            u.hostname = "vxbilibili.com";
-        }
-
-        return u.toString().replace(/\/+$/, "");
-
-    }catch(e){
-
-        return url;
-
-    }
-}
-
 async function copyCurrent(){
-
     await navigator.clipboard.writeText(
-        convert(location.href)
+        VX.convert(location.href)
     );
 
     toast(
-            strings.toastCopied
-        );
+        strings.toastCopied
+    );
 }
 
 function toast(msg){
@@ -319,9 +193,9 @@ function injectX(){
 
             b.textContent = strings.btnVX;
 
-                        b.setAttribute(
-                            "data-vxbtn",
-                            "1"
+            b.setAttribute(
+                "data-vxbtn",
+                "1"
             );
 
             b.style.cssText = `
@@ -361,12 +235,12 @@ function injectX(){
                     await navigator
                         .clipboard
                         .writeText(
-                            convert(url)
+                            VX.convert(url)
                         );
 
                     toast(
-                            strings.toastCopied
-                        );
+                        strings.toastCopied
+                    );
                 }
             );
 
@@ -441,7 +315,7 @@ function injectBili(){
     if(text){
 
         text.textContent =
-                    strings.btnVX;
+            strings.btnVX;
 
     }
 

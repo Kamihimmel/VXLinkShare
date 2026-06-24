@@ -17,7 +17,7 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["common.js", "background.js"]
   },
   "options_page": "options.html",
   "icons": {
@@ -32,7 +32,7 @@
         "*://*.reddit.com/*",
         "*://*.pixiv.net/*"
       ],
-      "js": ["content.js"],
+      "js": ["common.js", "content.js"],
       "run_at": "document_idle"
     }
   ]
