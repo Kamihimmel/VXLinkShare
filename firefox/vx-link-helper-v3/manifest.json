@@ -6,6 +6,7 @@
   "permissions": [
     "contextMenus",
     "clipboardWrite",
+    "storage",
     "<all_urls>"
   ],
   "background": {
@@ -13,6 +14,7 @@
       "background.js"
     ]
   },
+  "options_page": "options.html",
 "icons": {
   "128": "icon128.png"
 },

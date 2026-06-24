@@ -1,5 +1,54 @@
 (function(){
 
+// Settings cache
+let settings = {
+    sites: {
+        x: true,
+        reddit: true,
+        bilibili: true,
+        pixiv: true
+    }
+};
+
+// Load settings from storage
+function loadSettings() {
+    return new Promise((resolve) => {
+        chrome.storage.sync.get(null, (result) => {
+            const defaults = {
+                sites: {
+                    x: true,
+                    reddit: true,
+                    bilibili: true,
+                    pixiv: true
+                }
+            };
+            
+            settings = {
+                sites: {
+                    x: result?.sites?.x !== undefined ? result.sites.x : defaults.sites.x,
+                    reddit: result?.sites?.reddit !== undefined ? result.sites.reddit : defaults.sites.reddit,
+                    bilibili: result?.sites?.bilibili !== undefined ? result.sites.bilibili : defaults.sites.bilibili,
+                    pixiv: result?.sites?.pixiv !== undefined ? result.sites.pixiv : defaults.sites.pixiv
+                }
+            };
+            resolve();
+        });
+    });
+}
+
+// Listen for settings changes and re-run injection logic
+chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === "sync" && changes.sites) {
+        settings.sites = {
+            x: changes.sites.newValue?.x !== undefined ? changes.sites.newValue.x : settings.sites.x,
+            reddit: changes.sites.newValue?.reddit !== undefined ? changes.sites.newValue.reddit : settings.sites.reddit,
+            bilibili: changes.sites.newValue?.bilibili !== undefined ? changes.sites.newValue.bilibili : settings.sites.bilibili,
+            pixiv: changes.sites.newValue?.pixiv !== undefined ? changes.sites.newValue.pixiv : settings.sites.pixiv
+        };
+        run();
+    }
+});
+
 function convert(url){
 
     try{
@@ -454,29 +503,33 @@ function run(){
         location.hostname;
 
     if(
-        host.includes("x.com") ||
-        host.includes("twitter.com")
+        (host.includes("x.com") ||
+        host.includes("twitter.com")) &&
+        settings.sites.x
     ){
 
         injectX();
 
     }
     else if(
-        host.includes("bilibili.com")
+        host.includes("bilibili.com") &&
+        settings.sites.bilibili
     ){
 
         injectBili();
 
     }
     else if(
-        host.includes("reddit.com")
+        host.includes("reddit.com") &&
+        settings.sites.reddit
     ){
 
         injectReddit();
 
     }
     else if(
-        host.includes("pixiv.net")
+        host.includes("pixiv.net") &&
+        settings.sites.pixiv
     ){
 
         injectPixiv();
@@ -484,16 +537,18 @@ function run(){
     }
 }
 
-new MutationObserver(
-    run
-).observe(
-    document.documentElement,
-    {
-        childList:true,
-        subtree:true
-    }
-);
-
-run();
+// Load settings first, then initialize observers and run
+loadSettings().then(() => {
+    new MutationObserver(
+        run
+    ).observe(
+        document.documentElement,
+        {
+            childList:true,
+            subtree:true
+        }
+    );
+    run();
+});
 
 })();

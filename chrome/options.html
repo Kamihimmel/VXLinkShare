@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>VX Link Helper - Settings</title>
+    <link rel="icon" type="image/png" href="icon128.png">
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>VX Link Helper Settings</h1>
+            <p class="version">v3.0</p>
+        </header>
+
+        <main>
+            <!-- Language Settings -->
+            <section class="settings-section">
+                <h2 data-i18n="language">Language / 语言</h2>
+                <div class="setting-item">
+                    <label for="language" data-i18n="selectLanguage">Select Language:</label>
+                    <select id="language">
+                        <option value="system" data-i18n="systemDefault">System Default</option>
+                        <option value="en">English</option>
+                        <option value="zh">中文</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Site Activation Settings -->
+            <section class="settings-section">
+                <h2 data-i18n="enableSites">Enable Sites</h2>
+                <p class="section-desc" data-i18n="toggleDesc">Toggle VX button appearance on each site</p>
+                
+                <div class="toggle-grid">
+                    <div class="toggle-item">
+                        <div class="toggle-header">
+                            <input type="checkbox" id="site-x" class="site-toggle">
+                            <label for="site-x" class="site-label">X / Twitter</label>
+                        </div>
+                        <p class="site-desc">twitter.com, x.com</p>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-header">
+                            <input type="checkbox" id="site-reddit" class="site-toggle">
+                            <label for="site-reddit" class="site-label">Reddit</label>
+                        </div>
+                        <p class="site-desc">reddit.com</p>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-header">
+                            <input type="checkbox" id="site-bilibili" class="site-toggle">
+                            <label for="site-bilibili" class="site-label">Bilibili</label>
+                        </div>
+                        <p class="site-desc">bilibili.com</p>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-header">
+                            <input type="checkbox" id="site-pixiv" class="site-toggle">
+                            <label for="site-pixiv" class="site-label">Pixiv</label>
+                        </div>
+                        <p class="site-desc">pixiv.net</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Credits Section -->
+            <section class="settings-section credits-section">
+                <h2 data-i18n="credits">Credits & Thanks</h2>
+                <p class="section-desc" data-i18n="creditsDesc">This plugin relies on the following amazing open-source projects:</p>
+                
+                <div class="credits-list">
+                    <div class="credit-item">
+                        <h3>VXTwitter</h3>
+                        <p data-i18n="creditTwitterDesc">Enhanced Twitter/X link viewer</p>
+                        <a href="https://vxtwitter.com" target="_blank">vxtwitter.com</a>
+                    </div>
+
+                    <div class="credit-item">
+                        <h3>VXReddit</h3>
+                        <p data-i18n="creditRedditDesc">Enhanced Reddit link viewer</p>
+                        <a href="https://vxreddit.com" target="_blank">vxreddit.com</a>
+                    </div>
+
+                    <div class="credit-item">
+                        <h3>VXBilibili</h3>
+                        <p data-i18n="creditBilibiliDesc">Enhanced Bilibili link viewer</p>
+                        <a href="https://vxbilibili.com" target="_blank">vxbilibili.com</a>
+                    </div>
+
+                    <div class="credit-item">
+                        <h3>PhiXiv</h3>
+                        <p data-i18n="creditPixivDesc">Enhanced Pixiv link viewer</p>
+                        <a href="https://phixiv.net" target="_blank">phixiv.net</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Status Message -->
+            <div id="status" class="status-message"></div>
+        </main>
+
+        <footer>
+            <button id="reset-button" class="btn btn-secondary" data-i18n="resetBtn">Reset to Defaults</button>
+        </footer>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+</html>
