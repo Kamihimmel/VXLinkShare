@@ -1,0 +1,24 @@
+# Dependency directories
+node_modules/
+package-lock.json
+
+# OS files
+.DS_Store
+
+# Generated build products in chrome/
+chrome/common.js
+chrome/content.js
+chrome/background.js
+chrome/options.html
+chrome/options.js
+chrome/options.css
+chrome/icon128.png
+
+# Generated build products in firefox/
+firefox/common.js
+firefox/content.js
+firefox/background.js
+firefox/options.html
+firefox/options.js
+firefox/options.css
+firefox/icon128.png
