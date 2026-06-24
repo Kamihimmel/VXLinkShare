@@ -5,8 +5,6 @@
   "description": "Copy VX links with tracking cleanup (Chrome MV3 port)",
   "permissions": [
     "contextMenus",
-    "clipboardWrite",
-    "offscreen",
     "storage",
     "scripting"
   ],
