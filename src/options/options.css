@@ -119,15 +119,22 @@ main {
 }
 
 .setting-item select {
-    padding: 8px 12px;
+    padding: 10px 36px 10px 14px;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 14px;
     font-family: 'Outfit', sans-serif;
-    background: rgba(255, 255, 255, 0.05);
+    background: #1e2533 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238b949e' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 12px center;
     color: var(--text-main);
     cursor: pointer;
     transition: all 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.setting-item select option {
+    background: #1e2533;
+    color: var(--text-main);
 }
 
 .setting-item select:hover,

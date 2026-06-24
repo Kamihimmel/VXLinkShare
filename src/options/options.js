@@ -38,6 +38,29 @@ async function updateUILanguage(languageOverride = null) {
     }
 }
 
+// Dynamically populate language options from VX.TRANSLATIONS
+function populateLanguageOptions() {
+    const select = document.getElementById("language");
+    const currentValue = select.value;
+
+    // Remove all existing options except the first (System Default)
+    while (select.options.length > 1) {
+        select.remove(1);
+    }
+
+    // Add an option for each language in VX.TRANSLATIONS
+    const languageKeys = Object.keys(VX.TRANSLATIONS);
+    for (const key of languageKeys) {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = VX.LANGUAGE_DISPLAY[key] || key;
+        select.appendChild(option);
+    }
+
+    // Restore previously selected value
+    select.value = currentValue;
+}
+
 // Load and display current settings
 async function displaySettings() {
     const settings = await VX.loadSettings();
@@ -145,8 +168,9 @@ document.getElementById("language").addEventListener("change", async () => {
     }
 });
 
-// Initialize page - display settings FIRST, then listeners will be attached by displaySettings
+// Initialize page - populate language options, display settings, then update UI
 document.addEventListener("DOMContentLoaded", async () => {
+    populateLanguageOptions();
     await displaySettings();
     await updateUILanguage();
 });

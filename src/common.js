@@ -13,8 +13,14 @@ const VX = {
         }
     },
 
-    // Combined Translation dictionary
-    TRANSLATIONS: {
+    // Language display names (auto-populated in options dropdown)
+        LANGUAGE_DISPLAY: {
+            en: "English",
+            zh: "中文"
+        },
+
+        // Combined Translation dictionary
+        TRANSLATIONS: {
         en: {
             menuTitle: "Copy VX Link",
             toastCopied: "Copied VX Link",
