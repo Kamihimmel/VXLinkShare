@@ -58,7 +58,7 @@ function convert(url){
             u.hostname = "vxbilibili.com";
         }
 
-        return u.toString();
+        return u.toString().replace(/\/+$/, "");
 
     }catch(e){
 
