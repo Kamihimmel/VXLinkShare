@@ -1,0 +1,10 @@
+{
+  "name": "vxlinkshare",
+  "version": "3.0.0",
+  "description": "Copy VX links with tracking cleanup",
+  "scripts": {
+    "build": "node build.js",
+    "test": "node test.js"
+  },
+  "private": true
+}
