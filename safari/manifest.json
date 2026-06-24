@@ -9,7 +9,11 @@
     "scripting"
   ],
   "host_permissions": [
-    "*://*/*"
+    "*://*.x.com/*",
+    "*://*.twitter.com/*",
+    "*://*.bilibili.com/*",
+    "*://*.reddit.com/*",
+    "*://*.pixiv.net/*"
   ],
   "background": {
     "service_worker": "background.js"
