@@ -414,15 +414,14 @@ function injectReddit(){
 
 function injectPixiv(){
 
+    // Pixiv 分享按鈕是純 SVG 圖示無文字，用 SVG path 特徵定位
+    const shareSvg = document.querySelector(
+        'button svg path[d*="M25,17 L25,24"]'
+    );
+
     const share =
-        [...document.querySelectorAll(
-            "button,a"
-        )].find(
-            el =>
-                /share/i.test(
-                    el.textContent || ""
-                )
-        );
+        shareSvg
+            ?.closest("button");
 
     if(!share)
         return;
