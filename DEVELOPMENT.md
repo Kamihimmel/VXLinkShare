@@ -23,18 +23,17 @@ To prevent duplicate code, this extension uses a shared source system:
 
 To run or distribute the extensions, you must sync the shared source code to the browser-specific folders.
 
-### Prerequisites
-*   [Node.js](https://nodejs.org/) installed on your machine.
-
 ### Build Steps
 1.  Open your terminal in the root of the project.
-2.  Run the build command:
-    ```bash
-    npm run build
-    ```
-    *(Alternatively, you can run `node build.js` directly)*
-
-This will copy the shared assets from `src/` into the `chrome/` and `firefox/` folders.
+2.  Run the platform-specific build script to copy the shared assets from `src/` into the browser extension target directories (`chrome/`, `firefox/`, `safari/`):
+    *   **macOS / Linux**:
+        ```bash
+        ./build.sh
+        ```
+    *   **Windows**:
+        ```cmd
+        build.cmd
+        ```
 
 ---
 
@@ -70,10 +69,8 @@ Once the build is complete, you can load the extensions directly into your brows
 
 A suite of unit tests is provided to verify that URL parameters are correctly cleaned and domains are properly redirected.
 
-To run the test suite, execute:
-```bash
-npm test
-```
-*(Alternatively, you can run `node test.js` directly)*
+To run the test suite:
+1. Open the [`test.html`](file:///Users/howietang/gitrepos/VXLinkShare/test.html) file in any web browser (e.g., double-click the file or open it via your browser's "Open File" menu).
+2. The browser will run the tests automatically and display a visual dashboard showing which test cases passed or failed.
 
 The test runner tests conversion rules for **X/Twitter, Reddit, Bilibili, Pixiv**, and general link cleaner safety checks.
