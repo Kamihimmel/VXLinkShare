@@ -1,3 +1,54 @@
+// Translations
+const TRANSLATIONS = {
+    en: {
+        menuTitle: "Copy VX Link"
+    },
+    zh: {
+        menuTitle: "复制 VX 链接"
+    }
+};
+
+// Default settings
+const DEFAULT_SETTINGS = {
+    language: "system"
+};
+
+// Get system language
+function getSystemLanguage() {
+    const browserLang = navigator.language || navigator.userLanguage;
+    if (browserLang.startsWith("zh")) {
+        return "zh";
+    }
+    return "en";
+}
+
+// Get current language from storage
+function getCurrentLanguage() {
+    return new Promise((resolve) => {
+        chrome.storage.sync.get(["language"], (result) => {
+            let lang = (result && result.language) || DEFAULT_SETTINGS.language;
+            if (lang === "system") {
+                lang = getSystemLanguage();
+            }
+            resolve(lang);
+        });
+    });
+}
+
+// Update context menu title based on language
+async function updateContextMenu() {
+    const language = await getCurrentLanguage();
+    const strings = TRANSLATIONS[language] || TRANSLATIONS.en;
+
+    // Remove existing menu item(s) first
+    browser.contextMenus.removeAll(() => {
+        browser.contextMenus.create({
+            id: "copy-vx-link",
+            title: strings.menuTitle,
+            contexts: ["link"]
+        });
+    });
+}
 
 function convert(url){
  try{
@@ -58,14 +109,18 @@ function convert(url){
  }catch(e){return url;}
 }
 
-browser.contextMenus.create({
- id:"copy-vx-link",
- title:"复制 VX 链接",
- contexts:["link"]
-});
-
 browser.contextMenus.onClicked.addListener(async(info)=>{
  if(info.menuItemId==="copy-vx-link"){
    await navigator.clipboard.writeText(convert(info.linkUrl));
  }
 });
+
+// Listen for language changes in storage
+chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === "sync" && changes.language) {
+        updateContextMenu();
+    }
+});
+
+// Initialize context menu with translated title
+updateContextMenu();

@@ -3,6 +3,13 @@
   "name": "VX Link Helper V3",
   "version": "3.0",
   "description": "Copy VX links with tracking cleanup",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "vx-link-helper@yunlu18.net"
+    }
+  },
+
   "permissions": [
     "contextMenus",
     "clipboardWrite",
@@ -10,14 +17,12 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": [
-      "background.js"
-    ]
+    "scripts": ["background.js"]
   },
   "options_page": "options.html",
-"icons": {
-  "128": "icon128.png"
-},
+  "icons": {
+    "128": "icon128.png"
+  },
   "content_scripts": [
     {
       "matches": [
@@ -27,9 +32,7 @@
         "*://*.reddit.com/*",
         "*://*.pixiv.net/*"
       ],
-      "js": [
-        "content.js"
-      ],
+      "js": ["content.js"],
       "run_at": "document_idle"
     }
   ]
