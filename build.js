@@ -4,7 +4,8 @@ const path = require('path');
 const srcDir = path.join(__dirname, 'src');
 const targets = [
     path.join(__dirname, 'chrome'),
-    path.join(__dirname, 'firefox')
+    path.join(__dirname, 'firefox'),
+    path.join(__dirname, 'safari')
 ];
 
 // Helper to copy file

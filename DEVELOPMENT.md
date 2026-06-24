@@ -14,8 +14,8 @@ To prevent duplicate code, this extension uses a shared source system:
     *   `src/content.js`: The shared UI script injected into pages.
     *   `src/options/`: Shared options page styles, layout, and logic.
     *   `src/icon128.png`: Extension logo.
-*   **`chrome/` & `firefox/`**: Contain browser-specific files (such as `manifest.json` and background script configurations). 
-*   **`.gitignore`**: Configured to ignore all compiled build files in `chrome/` and `firefox/` to maintain a clean Git history.
+*   **`chrome/`, `firefox/` & `safari/`**: Contain browser-specific files (such as `manifest.json` files). 
+*   **`.gitignore`**: Configured to ignore all compiled build files in `chrome/`, `firefox/`, and `safari/` to maintain a clean Git history.
 
 ---
 
@@ -53,6 +53,16 @@ Once the build is complete, you can load the extensions directly into your brows
 2.  Click on **This Firefox** in the left sidebar.
 3.  Click the **Load Temporary Add-on...** button.
 4.  Navigate to the **`firefox/`** directory of this repository and select the `manifest.json` file.
+
+### Apple Safari (macOS)
+1.  Enable the **Develop** menu in Safari:
+    *   Open Safari and go to **Settings > Advanced**.
+    *   Check **Show Develop menu in menu bar** (or **Show features for web developers** in newer macOS versions).
+2.  Allow unsigned extensions:
+    *   Click the **Developer** menu in Safari's menu bar and check **Allow Unsigned Extensions**.
+3.  Load the extension temporarily:
+    *   Click the **Developer** menu in Safari's menu bar and select **Web Extension Developer Resources...** (or **Extension Developer...**).
+    *   Click **Add Temporary Extension...**, select the **`safari/`** directory of this repository
 
 ---
 

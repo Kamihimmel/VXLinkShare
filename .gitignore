@@ -22,3 +22,12 @@ firefox/options.html
 firefox/options.js
 firefox/options.css
 firefox/icon128.png
+
+# Generated build products in safari/
+safari/common.js
+safari/content.js
+safari/background.js
+safari/options.html
+safari/options.js
+safari/options.css
+safari/icon128.png
