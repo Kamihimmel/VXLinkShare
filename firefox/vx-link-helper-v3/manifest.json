@@ -14,7 +14,11 @@
     "contextMenus",
     "clipboardWrite",
     "storage",
-    "<all_urls>"
+    "*://*.x.com/*",
+    "*://*.twitter.com/*",
+    "*://*.bilibili.com/*",
+    "*://*.reddit.com/*",
+    "*://*.pixiv.net/*"
   ],
   "background": {
     "scripts": ["background.js"]
