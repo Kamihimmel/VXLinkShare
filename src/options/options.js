@@ -77,6 +77,35 @@ function setReplacementChoice(site, siteSettings, replacementKey) {
     }
 }
 
+function getCreditDesc(credit, lang) {
+    const desc = credit && credit.desc;
+    return (desc && (desc[lang] || desc.en)) || "";
+}
+
+function appendCreditCard(credits, credit, lang, siteKey = "") {
+    if (!credit) return;
+    const card = document.createElement("div");
+    card.className = "credit-item";
+    const h3 = document.createElement("h3");
+    h3.textContent = credit.name || siteKey;
+    const p = document.createElement("p");
+    p.className = "credit-desc";
+    if (siteKey) p.dataset.siteKey = siteKey;
+    p.dataset.creditName = credit.name || siteKey;
+    p.textContent = getCreditDesc(credit, lang);
+    card.appendChild(h3);
+    card.appendChild(p);
+    if (credit.url) {
+        const a = document.createElement("a");
+        a.href = credit.url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = credit.url.replace(/^https?:\/\//, "");
+        card.appendChild(a);
+    }
+    credits.appendChild(card);
+}
+
 // Build the site settings and credits from the registry (run once on load).
 function renderSites() {
     const grid = document.getElementById("toggle-grid");
@@ -168,28 +197,11 @@ function renderSites() {
         item.appendChild(options);
         grid.appendChild(item);
 
-        // --- credit ---
-        const credit = meta.credit;
-        if (credit) {
-            const card = document.createElement("div");
-            card.className = "credit-item";
-            const h3 = document.createElement("h3");
-            h3.textContent = credit.name || site.key;
-            const p = document.createElement("p");
-            p.className = "credit-desc";
-            p.dataset.siteKey = site.key;
-            p.textContent = VX.getCreditDesc(site, "en");
-            card.appendChild(h3);
-            card.appendChild(p);
-            if (credit.url) {
-                const a = document.createElement("a");
-                a.href = credit.url;
-                a.target = "_blank";
-                a.textContent = credit.url.replace(/^https?:\/\//, "");
-                card.appendChild(a);
-            }
-            credits.appendChild(card);
-        }
+        // --- credits ---
+        appendCreditCard(credits, meta.credit, "en", site.key);
+        (meta.extraCredits || []).forEach((extraCredit) => {
+            appendCreditCard(credits, extraCredit, "en", site.key);
+        });
     });
 }
 
@@ -245,8 +257,12 @@ async function updateUILanguage(languageOverride = null) {
             if (optionLabel) optionLabel.textContent = getSettingLabel(def, strings);
         });
 
-        const cdesc = document.querySelector(`.credit-desc[data-site-key="${site.key}"]`);
-        if (cdesc) cdesc.textContent = VX.getCreditDesc(site, language);
+        document.querySelectorAll(`.credit-desc[data-site-key="${site.key}"]`).forEach((cdesc) => {
+            const creditName = cdesc.dataset.creditName;
+            const credits = [site.meta && site.meta.credit, ...((site.meta && site.meta.extraCredits) || [])];
+            const credit = credits.find((candidate) => candidate && (candidate.name || site.key) === creditName);
+            if (credit) cdesc.textContent = getCreditDesc(credit, language);
+        });
     });
 }
 
