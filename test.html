@@ -336,19 +336,9 @@
                 expected: "https://sketch.pixiv.net/items/123"
             },
             {
-                name: "b23.tv BV short link -> vxbilibili /video/ path",
-                input: "https://b23.tv/BV1GJ411x7h7",
-                expected: "https://vxbilibili.com/video/BV1GJ411x7h7"
-            },
-            {
-                name: "b23.tv av short link -> vxbilibili /video/ path",
-                input: "https://b23.tv/av170001?spm_id_from=333",
-                expected: "https://vxbilibili.com/video/av170001"
-            },
-            {
-                name: "b23.tv opaque code left untouched (cannot expand client-side)",
-                input: "https://b23.tv/mUkdytX",
-                expected: "https://b23.tv/mUkdytX"
+                name: "b23.tv short links are not rewritten",
+                input: "https://b23.tv/BV1GJ411x7h7?spm_id_from=333",
+                expected: "https://b23.tv/BV1GJ411x7h7"
             }
         ];
 
