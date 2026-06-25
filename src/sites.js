@@ -202,7 +202,23 @@
                     fr: "Lecteur de liens Reddit amélioré",
                     ja: "Reddit リンクの強化ビューア"
                 }
-            }
+            },
+            extraCredits: [
+                {
+                    name: "RXddit",
+                    url: "https://rxddit.com",
+                    desc: {
+                        en: "Alternative enhanced Reddit link viewer",
+                        zh: "另一种增强型 Reddit 链接查看器",
+                        "zh-TW": "另一種增強型 Reddit 連結檢視器",
+                        es: "Visor alternativo mejorado de enlaces de Reddit",
+                        ar: "عارض بديل محسّن لروابط Reddit",
+                        pt: "Visualizador alternativo aprimorado de links do Reddit",
+                        fr: "Lecteur alternatif amélioré de liens Reddit",
+                        ja: "Reddit リンクの代替強化ビューア"
+                    }
+                }
+            ]
         }
     });
 
