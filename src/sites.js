@@ -8,7 +8,8 @@
 // Site contract:
 //   key          unique id, also the settings.sites key
 //   match(h, u)  convert(): does this handler own host h? (h = hostname minus "www.")
-//   rewrite(u,h) convert(): mutate the URL object in place (host swap, path, whitelist)
+//   rewrite(u,h,opts) convert(): mutate the URL object for domain replacement
+//   clean(u,h)    convert(): optional site-specific tracking cleanup
 //   contentMatch(host)  content script: should we inject the VX button on this host?
 //   inject(ctx)  content script: place the VX button (ctx = { strings, makeBtn,
 //                toast, copyUrl, convert })
@@ -25,6 +26,8 @@
             || h === "mobile.x.com" || h === "mobile.twitter.com",
         rewrite: (u) => {
             u.hostname = "vxtwitter.com";
+        },
+        clean: (u) => {
             u.searchParams.delete("t"); // tracking token on X/Twitter share links
         },
         contentMatch: (host) => host.includes("x.com") || host.includes("twitter.com"),
@@ -55,6 +58,7 @@
         meta: {
             defaultEnabled: true,
             domains: "twitter.com, x.com",
+            replacementDomains: { vx: "vxtwitter.com" },
             label: { en: "X / Twitter", zh: "X / 推特", "zh-TW": "X / 推特" },
             credit: {
                 name: "VXTwitter",
@@ -78,7 +82,9 @@
         key: "reddit",
         // All reddit subdomains (old., new., np., i., m., ...) serve the same paths.
         match: (h) => h === "reddit.com" || h.endsWith(".reddit.com"),
-        rewrite: (u) => { u.hostname = "vxreddit.com"; },
+        rewrite: (u, h, opts = {}) => {
+            u.hostname = opts.replacement === "rx" ? "rxddit.com" : "vxreddit.com";
+        },
         contentMatch: (host) => host.includes("reddit.com"),
         inject: (ctx) => {
             const postUrl = (post) => {
@@ -181,6 +187,7 @@
         meta: {
             defaultEnabled: true,
             domains: "reddit.com",
+            replacementDomains: { vx: "vxreddit.com", rx: "rxddit.com" },
             label: { en: "Reddit", zh: "Reddit" },
             credit: {
                 name: "VXReddit",
@@ -219,6 +226,7 @@
         meta: {
             defaultEnabled: true,
             domains: "pixiv.net",
+            replacementDomains: { vx: "phixiv.net" },
             label: { en: "Pixiv", zh: "Pixiv" },
             credit: {
                 name: "PhiXiv",
@@ -267,6 +275,8 @@
                 const id = u.pathname.match(B23_ID)[1];
                 u.pathname = "/video/" + id;
             }
+        },
+        clean: (u) => {
             // Whitelist: keep only params that identify the video/episode.
             [...u.searchParams.keys()].forEach((k) => {
                 if (!BILI_ALLOWED.has(k)) u.searchParams.delete(k);
@@ -305,6 +315,7 @@
         meta: {
             defaultEnabled: true,
             domains: "bilibili.com, b23.tv",
+            replacementDomains: { vx: "vxbilibili.com" },
             label: { en: "Bilibili", zh: "哔哩哔哩", "zh-TW": "嗶哩嗶哩" },
             credit: {
                 name: "VXBilibili",

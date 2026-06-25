@@ -65,21 +65,27 @@
     // Context handed to each site's inject().
     const ctx = {
         get strings() { return strings; },
-        convert: (url) => VX.convert(url),
+        convert: (url) => VX.convert(url, settings),
         toast,
         makeBtn,
         async copyUrl(url) {
-            await navigator.clipboard.writeText(VX.convert(url));
+            await navigator.clipboard.writeText(VX.convert(url, settings));
             toast(strings.toastCopied);
         }
     };
 
-    // Inject the VX button for every enabled site whose host matches.
+    function siteHasActiveAction(site) {
+        const siteSettings = VX.normalizeSiteSettings(site, settings.sites && settings.sites[site.key]);
+        return !!siteSettings.cleanTracking || !!VX.getActiveReplacementKey(site, siteSettings);
+    }
+
+    // Inject the VX button for every site whose host matches and has at least one
+    // active action (domain replacement or tracking cleanup) enabled.
     function run() {
         const host = location.hostname;
         for (const site of VX.sites) {
             if (site.inject && site.contentMatch
-                && site.contentMatch(host) && settings.sites[site.key]) {
+                && site.contentMatch(host) && siteHasActiveAction(site)) {
                 try { site.inject(ctx); } catch (e) { /* a flaky site selector must not break others */ }
             }
         }

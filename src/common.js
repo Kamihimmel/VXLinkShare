@@ -6,7 +6,8 @@
 
 const VX = {
     // Default settings. `sites` is populated by registerSite() from each site's
-    // meta.defaultEnabled, so adding a site needs no edit here.
+    // metadata, so adding a site needs no edit here. Each site setting can
+    // independently control domain replacement and tracking cleanup.
     DEFAULT_SETTINGS: {
         language: "system",
         sites: {}
@@ -44,7 +45,9 @@ const VX = {
             selectLanguage: "Select Language:",
             systemDefault: "System Default",
             enableSites: "Enable Sites",
-            toggleDesc: "Toggle VX button appearance on each site",
+            toggleDesc: "Control domain replacement and tracking cleanup for each site",
+            replaceDomainLabel: "Replace domain with {domain}",
+            cleanTrackingLabel: "Clean tracking parameters",
             credits: "Credits & Thanks",
             creditsDesc: "This plugin relies on the following amazing open-source projects:",
             resetBtn: "Reset to Defaults",
@@ -62,7 +65,9 @@ const VX = {
             selectLanguage: "选择语言:",
             systemDefault: "系统默认",
             enableSites: "启用网站",
-            toggleDesc: "在每个网站上切换 VX 按钮的显示",
+            toggleDesc: "分别控制每个网站的域名替换和追踪参数清理",
+            replaceDomainLabel: "替换域名为 {domain}",
+            cleanTrackingLabel: "清理追踪参数",
             credits: "致谢",
             creditsDesc: "本插件依赖以下优秀的开源项目:",
             resetBtn: "重置为默认值",
@@ -80,7 +85,9 @@ const VX = {
             selectLanguage: "選擇語言：",
             systemDefault: "系統預設",
             enableSites: "啟用網站",
-            toggleDesc: "在每個網站上切換 VX 按鈕的顯示",
+            toggleDesc: "分別控制每個網站的網域替換與追蹤參數清理",
+            replaceDomainLabel: "替換網域為 {domain}",
+            cleanTrackingLabel: "清理追蹤參數",
             credits: "致謝",
             creditsDesc: "本擴充功能依賴以下優秀的開源專案：",
             resetBtn: "重設為預設值",
@@ -98,7 +105,9 @@ const VX = {
             selectLanguage: "Seleccionar idioma:",
             systemDefault: "Predeterminado del sistema",
             enableSites: "Activar sitios",
-            toggleDesc: "Activa o desactiva el botón VX en cada sitio",
+            toggleDesc: "Controla por separado el reemplazo de dominio y la limpieza de seguimiento por sitio",
+            replaceDomainLabel: "Reemplazar dominio por {domain}",
+            cleanTrackingLabel: "Limpiar parámetros de seguimiento",
             credits: "Créditos y agradecimientos",
             creditsDesc: "Esta extensión se apoya en los siguientes excelentes proyectos de código abierto:",
             resetBtn: "Restablecer valores predeterminados",
@@ -116,7 +125,9 @@ const VX = {
             selectLanguage: "اختر اللغة:",
             systemDefault: "افتراضي النظام",
             enableSites: "تفعيل المواقع",
-            toggleDesc: "تبديل ظهور زر VX في كل موقع",
+            toggleDesc: "تحكم بشكل منفصل في استبدال النطاق وتنظيف معلمات التتبع لكل موقع",
+            replaceDomainLabel: "استبدال النطاق بـ {domain}",
+            cleanTrackingLabel: "تنظيف معلمات التتبع",
             credits: "شكر وتقدير",
             creditsDesc: "يعتمد هذا الملحق على مشاريع المصدر المفتوح الرائعة التالية:",
             resetBtn: "إعادة التعيين إلى الافتراضي",
@@ -134,7 +145,9 @@ const VX = {
             selectLanguage: "Selecionar idioma:",
             systemDefault: "Padrão do sistema",
             enableSites: "Ativar sites",
-            toggleDesc: "Ative ou desative o botão VX em cada site",
+            toggleDesc: "Controle separadamente a substituição de domínio e a limpeza de rastreamento por site",
+            replaceDomainLabel: "Substituir domínio por {domain}",
+            cleanTrackingLabel: "Limpar parâmetros de rastreamento",
             credits: "Créditos e agradecimentos",
             creditsDesc: "Esta extensão depende dos seguintes excelentes projetos de código aberto:",
             resetBtn: "Redefinir para o padrão",
@@ -152,7 +165,9 @@ const VX = {
             selectLanguage: "Choisir la langue :",
             systemDefault: "Par défaut du système",
             enableSites: "Activer les sites",
-            toggleDesc: "Afficher ou masquer le bouton VX sur chaque site",
+            toggleDesc: "Contrôlez séparément le remplacement de domaine et le nettoyage du suivi pour chaque site",
+            replaceDomainLabel: "Remplacer le domaine par {domain}",
+            cleanTrackingLabel: "Nettoyer les paramètres de suivi",
             credits: "Crédits et remerciements",
             creditsDesc: "Cette extension s'appuie sur les excellents projets open source suivants :",
             resetBtn: "Réinitialiser",
@@ -170,7 +185,9 @@ const VX = {
             selectLanguage: "言語を選択:",
             systemDefault: "システムのデフォルト",
             enableSites: "サイトを有効化",
-            toggleDesc: "各サイトでの VX ボタンの表示を切り替えます",
+            toggleDesc: "サイトごとにドメイン置換と追跡パラメータ削除を個別に制御します",
+            replaceDomainLabel: "ドメインを {domain} に置換",
+            cleanTrackingLabel: "追跡パラメータを削除",
             credits: "クレジットと謝辞",
             creditsDesc: "この拡張機能は、以下の素晴らしいオープンソースプロジェクトを利用しています:",
             resetBtn: "デフォルトに戻す",
@@ -187,9 +204,67 @@ const VX = {
     registerSite(def) {
         VX.sites.push(def);
         if (def && def.key) {
-            const on = def.meta && def.meta.defaultEnabled;
-            VX.DEFAULT_SETTINGS.sites[def.key] = on === undefined ? true : on;
+            VX.DEFAULT_SETTINGS.sites[def.key] = VX.getDefaultSiteSettings(def);
         }
+    },
+
+    getReplacementDomains(site) {
+        const meta = site && site.meta;
+        if (meta && meta.replacementDomains) return meta.replacementDomains;
+        const creditUrl = meta && meta.credit && meta.credit.url;
+        if (!creditUrl) return {};
+        try {
+            return { vx: new URL(creditUrl).hostname };
+        } catch (e) {
+            return {};
+        }
+    },
+
+    getDefaultSiteSettings(site) {
+        const meta = site && site.meta;
+        const on = meta && meta.defaultEnabled;
+        const enabledByDefault = on === undefined ? true : !!on;
+        const defaults = {
+            replaceDomain: enabledByDefault,
+            cleanTracking: enabledByDefault
+        };
+        const domains = VX.getReplacementDomains(site);
+        Object.keys(domains).forEach((key) => {
+            if (key !== "vx") {
+                const settingKey = "replaceDomain" + key.charAt(0).toUpperCase() + key.slice(1);
+                defaults[settingKey] = false;
+            }
+        });
+        return defaults;
+    },
+
+    normalizeSiteSettings(site, saved) {
+        const defaults = VX.getDefaultSiteSettings(site);
+        if (typeof saved === "boolean") {
+            // Backward compatibility with v3.0's single per-site toggle: false
+            // disabled that site's conversion/button behavior, true enabled it.
+            return {
+                ...defaults,
+                replaceDomain: saved,
+                cleanTracking: saved
+            };
+        }
+        if (saved && typeof saved === "object") {
+            return { ...defaults, ...saved };
+        }
+        return defaults;
+    },
+
+    getActiveReplacementKey(site, siteSettings) {
+        const settings = siteSettings || VX.getDefaultSiteSettings(site);
+        const domains = VX.getReplacementDomains(site);
+        const alternate = Object.keys(domains).find((key) => {
+            if (key === "vx") return false;
+            const settingKey = "replaceDomain" + key.charAt(0).toUpperCase() + key.slice(1);
+            return !!settings[settingKey];
+        });
+        if (alternate) return alternate;
+        return settings.replaceDomain ? "vx" : null;
     },
 
     // Resolve a site's localized label / credit description, with fallbacks.
@@ -260,6 +335,12 @@ const VX = {
         return VX.TRANSLATIONS[lang] || VX.TRANSLATIONS.en;
     },
 
+    formatString(template, values = {}) {
+        return String(template || "").replace(/\{(\w+)\}/g, (match, key) => (
+            values[key] === undefined ? match : values[key]
+        ));
+    },
+
     // Load full settings merged with defaults (generic over registered sites)
     loadSettings() {
         return new Promise((resolve) => {
@@ -268,9 +349,7 @@ const VX = {
                 const sites = {};
                 VX.sites.forEach((site) => {
                     const saved = stored.sites && stored.sites[site.key];
-                    sites[site.key] = saved !== undefined
-                        ? saved
-                        : VX.DEFAULT_SETTINGS.sites[site.key];
+                    sites[site.key] = VX.normalizeSiteSettings(site, saved);
                 });
                 resolve({
                     language: stored.language || VX.DEFAULT_SETTINGS.language,
@@ -294,27 +373,38 @@ const VX = {
     },
 
     // Clean tracking query parameters and convert URL to sharing format.
-    // Scoping: on a recognized (rewritten) host we clean aggressively; on any
-    // other URL we only strip unambiguous global trackers and otherwise leave
-    // the link untouched (functional params and #fragment preserved).
-    convert(url) {
+    // Scoping: supported-site URLs obey that site's independent settings;
+    // unrelated URLs still receive generic unambiguous tracking cleanup.
+    convert(url, settingsOverride = null) {
         try {
             const u = new URL(url);
             const h = u.hostname.replace(/^www\./, "");
-
-            VX.GLOBAL_TRACKERS.forEach(p => u.searchParams.delete(p));
 
             const site = VX.sites.find(s => {
                 try { return s.match && s.match(h, u); } catch (e) { return false; }
             });
 
             if (site) {
-                VX.SITE_TRACKERS.forEach(p => u.searchParams.delete(p));
-                u.hash = ""; // no share-relevant fragment on supported sites
-                site.rewrite(u, h);
-                return u.toString().replace(/\/+$/, "");
+                const siteSettings = VX.normalizeSiteSettings(
+                    site,
+                    settingsOverride && settingsOverride.sites && settingsOverride.sites[site.key]
+                );
+                if (siteSettings.cleanTracking) {
+                    VX.GLOBAL_TRACKERS.forEach(p => u.searchParams.delete(p));
+                    VX.SITE_TRACKERS.forEach(p => u.searchParams.delete(p));
+                    if (site.clean) site.clean(u, h);
+                    u.hash = ""; // no share-relevant fragment on supported sites
+                }
+                const replacementKey = VX.getActiveReplacementKey(site, siteSettings);
+                if (replacementKey && site.rewrite) {
+                    site.rewrite(u, h, { replacement: replacementKey });
+                }
+                const transformed = !!siteSettings.cleanTracking || !!replacementKey;
+                const out = u.toString();
+                return transformed ? out.replace(/\/+$/, "") : out;
             }
 
+            VX.GLOBAL_TRACKERS.forEach(p => u.searchParams.delete(p));
             return u.toString();
         } catch (e) {
             return url;
@@ -351,7 +441,8 @@ const VX = {
             if (info.menuItemId !== "copy-vx-link") return;
             const language = await VX.getCurrentLanguage();
             const strings = VX.getStrings(language);
-            const text = VX.convert(info.linkUrl);
+            const settings = await VX.loadSettings();
+            const text = VX.convert(info.linkUrl, settings);
             await VX.writeToClipboard(text, {
                 tabId: tab && tab.id,
                 toast: strings.toastCopied,

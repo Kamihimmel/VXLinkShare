@@ -1,8 +1,50 @@
 // VX Link Share - Options page (generic over the site registry).
-// Site toggles and credits are generated from VX.sites; adding a site needs no
-// edit here.
+// Site settings and credits are generated from VX.sites; adding a site needs no
+// edit here unless it introduces a new kind of per-site option.
 
-// Build the site toggles and credits from the registry (run once on load).
+function siteSettingId(siteKey, settingKey) {
+    return `site-${siteKey}-${settingKey}`;
+}
+
+function cloneDefaultSites() {
+    const sites = {};
+    VX.sites.forEach((site) => {
+        sites[site.key] = { ...VX.DEFAULT_SETTINGS.sites[site.key] };
+    });
+    return sites;
+}
+
+function getReplacementSettingKey(replacementKey) {
+    return replacementKey === "vx"
+        ? "replaceDomain"
+        : "replaceDomain" + replacementKey.charAt(0).toUpperCase() + replacementKey.slice(1);
+}
+
+function getSiteSettingDefinitions(site) {
+    const domains = VX.getReplacementDomains(site);
+    const defs = [];
+
+    Object.keys(domains).forEach((replacementKey) => {
+        defs.push({
+            key: getReplacementSettingKey(replacementKey),
+            type: "replacement",
+            replacementKey,
+            domain: domains[replacementKey]
+        });
+    });
+
+    defs.push({ key: "cleanTracking", type: "clean" });
+    return defs;
+}
+
+function getSettingLabel(def, strings) {
+    if (def.type === "replacement") {
+        return VX.formatString(strings.replaceDomainLabel, { domain: def.domain });
+    }
+    return strings.cleanTrackingLabel;
+}
+
+// Build the site settings and credits from the registry (run once on load).
 function renderSites() {
     const grid = document.getElementById("toggle-grid");
     const credits = document.getElementById("credits-list");
@@ -12,27 +54,46 @@ function renderSites() {
     VX.sites.forEach((site) => {
         const meta = site.meta || {};
 
-        // --- toggle ---
+        // --- settings card ---
         const item = document.createElement("div");
         item.className = "toggle-item";
-        const header = document.createElement("div");
-        header.className = "toggle-header";
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.id = "site-" + site.key;
-        input.className = "site-toggle";
-        input.dataset.siteKey = site.key;
-        const label = document.createElement("label");
-        label.setAttribute("for", input.id);
-        label.className = "site-label";
-        label.textContent = VX.getSiteLabel(site, "en");
-        header.appendChild(input);
-        header.appendChild(label);
+
+        const title = document.createElement("h3");
+        title.className = "site-label site-title";
+        title.dataset.siteKey = site.key;
+        title.textContent = VX.getSiteLabel(site, "en");
+        item.appendChild(title);
+
         const desc = document.createElement("p");
         desc.className = "site-desc";
         desc.textContent = meta.domains || "";
-        item.appendChild(header);
         item.appendChild(desc);
+
+        const options = document.createElement("div");
+        options.className = "site-options";
+        getSiteSettingDefinitions(site).forEach((def) => {
+            const row = document.createElement("div");
+            row.className = "toggle-header site-option";
+
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.id = siteSettingId(site.key, def.key);
+            input.className = "site-setting-toggle";
+            input.dataset.siteKey = site.key;
+            input.dataset.settingKey = def.key;
+
+            const label = document.createElement("label");
+            label.setAttribute("for", input.id);
+            label.className = "site-option-label";
+            label.dataset.siteKey = site.key;
+            label.dataset.settingKey = def.key;
+            label.textContent = getSettingLabel(def, VX.getStrings("en"));
+
+            row.appendChild(input);
+            row.appendChild(label);
+            options.appendChild(row);
+        });
+        item.appendChild(options);
         grid.appendChild(item);
 
         // --- credit ---
@@ -85,10 +146,18 @@ async function updateUILanguage(languageOverride = null) {
         }
     });
 
-    // Per-site labels + credit descriptions from the registry
+    // Per-site labels, option labels, and credit descriptions from the registry
     VX.sites.forEach((site) => {
-        const label = document.querySelector(`label[for="site-${site.key}"]`);
+        const label = document.querySelector(`.site-title[data-site-key="${site.key}"]`);
         if (label) label.textContent = VX.getSiteLabel(site, language);
+
+        getSiteSettingDefinitions(site).forEach((def) => {
+            const optionLabel = document.querySelector(
+                `.site-option-label[data-site-key="${site.key}"][data-setting-key="${def.key}"]`
+            );
+            if (optionLabel) optionLabel.textContent = getSettingLabel(def, strings);
+        });
+
         const cdesc = document.querySelector(`.credit-desc[data-site-key="${site.key}"]`);
         if (cdesc) cdesc.textContent = VX.getCreditDesc(site, language);
     });
@@ -119,10 +188,13 @@ async function displaySettings() {
 
     document.getElementById("language").value = settings.language || VX.DEFAULT_SETTINGS.language;
 
-    // Set each site toggle from settings (listeners are (re)attached after).
+    // Set each site setting checkbox from settings (listeners are (re)attached after).
     VX.sites.forEach((site) => {
-        const cb = document.getElementById("site-" + site.key);
-        if (cb) cb.checked = !!settings.sites[site.key];
+        const siteSettings = VX.normalizeSiteSettings(site, settings.sites[site.key]);
+        getSiteSettingDefinitions(site).forEach((def) => {
+            const cb = document.getElementById(siteSettingId(site.key, def.key));
+            if (cb) cb.checked = !!siteSettings[def.key];
+        });
     });
 
     attachCheckboxListeners();
@@ -138,28 +210,35 @@ async function showStatus(message) {
     }, 2000);
 }
 
-// Save a single site toggle and show status
-async function saveSiteSetting(siteKey, checked) {
+// Save a single site setting and show status
+async function saveSiteSetting(siteKey, settingKey, checked) {
     try {
         const settings = await VX.loadSettings();
-        settings.sites[siteKey] = checked;
+        const site = VX.sites.find((candidate) => candidate.key === siteKey);
+        if (!site) return;
+        settings.sites[siteKey] = VX.normalizeSiteSettings(site, settings.sites[siteKey]);
+        settings.sites[siteKey][settingKey] = checked;
         await VX.saveSettings(settings);
         const strings = VX.getStrings(await VX.getCurrentLanguage());
         await showStatus(strings.savedSuccess);
     } catch (error) {
-        console.error(`Error saving site-${siteKey} setting:`, error);
+        console.error(`Error saving site-${siteKey}-${settingKey} setting:`, error);
     }
 }
 
-// Attach change handlers to every site toggle (idempotent: clone-replace first).
+// Attach change handlers to every site setting toggle (idempotent: clone-replace first).
 function attachCheckboxListeners() {
     VX.sites.forEach((site) => {
-        const cb = document.getElementById("site-" + site.key);
-        if (!cb) return;
-        const fresh = cb.cloneNode(true);
-        cb.parentNode.replaceChild(fresh, cb);
-        fresh.checked = cb.checked;
-        fresh.addEventListener("change", (e) => saveSiteSetting(site.key, e.target.checked));
+        getSiteSettingDefinitions(site).forEach((def) => {
+            const cb = document.getElementById(siteSettingId(site.key, def.key));
+            if (!cb) return;
+            const fresh = cb.cloneNode(true);
+            cb.parentNode.replaceChild(fresh, cb);
+            fresh.checked = cb.checked;
+            fresh.addEventListener("change", (e) => {
+                saveSiteSetting(site.key, def.key, e.target.checked);
+            });
+        });
     });
 }
 
@@ -169,7 +248,7 @@ document.getElementById("reset-button").addEventListener("click", async () => {
         try {
             await VX.saveSettings({
                 language: VX.DEFAULT_SETTINGS.language,
-                sites: { ...VX.DEFAULT_SETTINGS.sites }
+                sites: cloneDefaultSites()
             });
             await displaySettings();
             const strings = VX.getStrings(await VX.getCurrentLanguage());

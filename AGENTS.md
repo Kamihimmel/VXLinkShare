@@ -55,7 +55,7 @@ update every call site and `test.html` in the same change.
 
 | Member                              | Contract                                                              |
 | ----------------------------------- | -------------------------------------------------------------------- |
-| `convert(url)`                      | Pure URL transform — see §3.                                          |
+| `convert(url, settings?)`           | Pure URL transform using optional normalized settings — see §3.       |
 | `sites` / `registerSite(def)`       | The site registry — see §8. Site defs live in `sites.js`, never in core. |
 | `getSiteLabel` / `getCreditDesc`    | Resolve a site's localized label / credit (options page).            |
 | `GLOBAL_TRACKERS` / `SITE_TRACKERS` | Param blacklists used by `convert()` (any-host vs supported-host-only). |
@@ -144,8 +144,10 @@ The options dropdown auto-populates from `TRANSLATIONS`, so never hand-edit the 
 
 - Settings live in `chrome.storage.sync` and are ALWAYS read via `VX.loadSettings()`, merged
   against `DEFAULT_SETTINGS`. Never assume a key exists on the raw storage object.
-- `DEFAULT_SETTINGS.sites` is filled by `registerSite()` from each site's `meta.defaultEnabled`,
-  and `loadSettings()` merges over the registered sites — so adding a site needs no edit here.
+- `DEFAULT_SETTINGS.sites` is filled by `registerSite()` from each site's metadata. Each site stores
+  an object of independent booleans: `replaceDomain`, `cleanTracking`, plus optional alternate
+  replacement toggles such as Reddit's `replaceDomainRx`. Adding a site needs no core edit unless it
+  introduces a new setting kind.
 - Schema changes stay backward compatible: a new setting needs a default in `DEFAULT_SETTINGS`
   and a fallback at every read site, so older synced data keeps working.
 
@@ -158,10 +160,11 @@ names a site — it only iterates the registry. A block provides these fields:
 | -------------------- | ------------------------------------------------------------------------------- |
 | `key`                | Unique id; also the `settings.sites` key.                                        |
 | `match(h, u)`        | `convert()`: does this site own host `h` (www-stripped)? `u` is the `URL` object. |
-| `rewrite(u, h)`      | `convert()`: mutate the URL in place (host swap, path, param allow-list).         |
+| `rewrite(u, h, opts)` | `convert()`: mutate the URL in place for domain replacement (host swap and any replacement-only path changes). |
+| `clean(u, h)`       | `convert()`: optional site-specific cleanup beyond the shared tracker lists.       |
 | `contentMatch(host)` | Content script: inject the VX button on this host?                               |
 | `inject(ctx)`        | Content script: place the button using `ctx` = `{ strings, makeBtn, toast, copyUrl, convert }`. |
-| `meta`               | `{ defaultEnabled, domains, label{lang}, credit{name,url,desc{lang}} }` — drives the default toggle, options toggle + label, credits, and i18n. |
+| `meta`               | `{ defaultEnabled, domains, replacementDomains?, label{lang}, credit{name,url,desc{lang}} }` — drives default settings, options labels, credits, and i18n. |
 
 Each function has a **behavioral contract** — meeting the field list is not enough:
 
