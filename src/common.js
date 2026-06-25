@@ -1,26 +1,26 @@
-// VX Link Share - Shared Common Logic
-// This file is loaded first in all execution contexts (background, content, options).
+// VX Link Share - Core framework (shared by background, content, options).
+//
+// This file is loaded FIRST in every execution context. It knows nothing about
+// any specific site: site behavior lives in sites.js (loaded next), which calls
+// VX.registerSite(). The core just dispatches to that registry.
 
 const VX = {
-    // Default settings
+    // Default settings. `sites` is populated by registerSite() from each site's
+    // meta.defaultEnabled, so adding a site needs no edit here.
     DEFAULT_SETTINGS: {
         language: "system",
-        sites: {
-            x: true,
-            reddit: true,
-            bilibili: true,
-            pixiv: true
-        }
+        sites: {}
     },
 
-    // Language display names (auto-populated in options dropdown)
-        LANGUAGE_DISPLAY: {
-            en: "English",
-            zh: "中文"
-        },
+    // Language display names (auto-populated in the options dropdown).
+    LANGUAGE_DISPLAY: {
+        en: "English",
+        zh: "中文"
+    },
 
-        // Combined Translation dictionary
-        TRANSLATIONS: {
+    // Common UI strings only. Per-site labels and credits live in each site's
+    // meta (see sites.js), so this dictionary never grows when a site is added.
+    TRANSLATIONS: {
         en: {
             menuTitle: "Copy VX Link",
             toastCopied: "Copied VX Link",
@@ -37,15 +37,7 @@ const VX = {
             resetBtn: "Reset to Defaults",
             saveBtn: "Save Settings",
             savedSuccess: "Settings saved successfully!",
-            resetSuccess: "Settings reset to defaults!",
-            twitter: "X / Twitter",
-            reddit: "Reddit",
-            bilibili: "Bilibili",
-            pixiv: "Pixiv",
-            creditTwitterDesc: "Enhanced Twitter/X link viewer",
-            creditRedditDesc: "Enhanced Reddit link viewer",
-            creditBilibiliDesc: "Enhanced Bilibili link viewer",
-            creditPixivDesc: "Enhanced Pixiv link viewer"
+            resetSuccess: "Settings reset to defaults!"
         },
         zh: {
             menuTitle: "复制 VX 链接",
@@ -63,17 +55,59 @@ const VX = {
             resetBtn: "重置为默认值",
             saveBtn: "保存设置",
             savedSuccess: "设置保存成功!",
-            resetSuccess: "设置已重置为默认值!",
-            twitter: "X / 推特",
-            reddit: "Reddit",
-            bilibili: "哔哩哔哩",
-            pixiv: "Pixiv",
-            creditTwitterDesc: "增强型 Twitter/X 链接查看器",
-            creditRedditDesc: "增强型 Reddit 链接查看器",
-            creditBilibiliDesc: "增强型哔哩哔哩链接查看器",
-            creditPixivDesc: "增强型 Pixiv 链接查看器"
+            resetSuccess: "设置已重置为默认值!"
         }
     },
+
+    // ----- Site registry -----
+    // Each entry is a self-contained definition: { key, match, rewrite,
+    // contentMatch, inject, meta }. See sites.js and AGENTS.md for the contract.
+    sites: [],
+    registerSite(def) {
+        VX.sites.push(def);
+        if (def && def.key) {
+            const on = def.meta && def.meta.defaultEnabled;
+            VX.DEFAULT_SETTINGS.sites[def.key] = on === undefined ? true : on;
+        }
+    },
+
+    // Resolve a site's localized label / credit description, with fallbacks.
+    getSiteLabel(site, lang) {
+        const l = site.meta && site.meta.label;
+        return (l && (l[lang] || l.en)) || site.key;
+    },
+    getCreditDesc(site, lang) {
+        const c = site.meta && site.meta.credit;
+        const d = c && c.desc;
+        return (d && (d[lang] || d.en)) || "";
+    },
+
+    // ----- Tracking parameter lists used by convert() -----
+    // Global: unambiguous trackers, safe to strip from ANY URL.
+    GLOBAL_TRACKERS: [
+        "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
+        "utm_id", "utm_custom",
+        "spm_id_from", "from_spmid", "from_spmid_from", "spmid", "spmid_from",
+        "share_spmid", "vd_source", "buvid", "buvid_from",
+        "share_source", "share_source_mutation", "share_medium", "share_plat",
+        "share_session_id", "share_tag", "share_tag_id", "share_id",
+        "share_medium_id", "share_plat_id", "share_channel", "share_token",
+        "share_origin", "share_session",
+        "ref_src", "refer_url", "mao2_medium", "mao2_source", "cover_shid",
+        "shid", "track_id", "signCoverage", "msource", "bsource", "ssource",
+        "csource", "vc_name", "vc_source", "ha_source", "ha_method",
+        "camp_id", "promotion_id", "ttk_id", "union_source", "branch_pid",
+        "fromsource"
+    ],
+    // Site-only: generic names that are often FUNCTIONAL on arbitrary sites, so
+    // they are stripped only once a registered site has matched the host.
+    SITE_TRACKERS: [
+        "s", "from", "goto", "forward", "intro", "network", "platform",
+        "session_id", "timestamp", "ts", "fr", "nm", "mx", "attach",
+        "argv", "extension", "screenName", "seid", "plat_id", "webid",
+        "bbid", "unique_k", "is_story_h5", "auto_play", "wifiAutoPlay",
+        "preview_template", "mobile_pkg"
+    ],
 
     // Get browser/system language
     getSystemLanguage() {
@@ -97,26 +131,27 @@ const VX = {
         });
     },
 
-    // Get standard translated strings for options/content script
+    // Get common translated strings
     getStrings(lang) {
         return VX.TRANSLATIONS[lang] || VX.TRANSLATIONS.en;
     },
 
-    // Load full settings merged with defaults
+    // Load full settings merged with defaults (generic over registered sites)
     loadSettings() {
         return new Promise((resolve) => {
             chrome.storage.sync.get(null, (result) => {
-                const settings = result || {};
-                const merged = {
-                    language: settings.language || VX.DEFAULT_SETTINGS.language,
-                    sites: {
-                        x: settings.sites?.x !== undefined ? settings.sites.x : VX.DEFAULT_SETTINGS.sites.x,
-                        reddit: settings.sites?.reddit !== undefined ? settings.sites.reddit : VX.DEFAULT_SETTINGS.sites.reddit,
-                        bilibili: settings.sites?.bilibili !== undefined ? settings.sites.bilibili : VX.DEFAULT_SETTINGS.sites.bilibili,
-                        pixiv: settings.sites?.pixiv !== undefined ? settings.sites.pixiv : VX.DEFAULT_SETTINGS.sites.pixiv
-                    }
-                };
-                resolve(merged);
+                const stored = result || {};
+                const sites = {};
+                VX.sites.forEach((site) => {
+                    const saved = stored.sites && stored.sites[site.key];
+                    sites[site.key] = saved !== undefined
+                        ? saved
+                        : VX.DEFAULT_SETTINGS.sites[site.key];
+                });
+                resolve({
+                    language: stored.language || VX.DEFAULT_SETTINGS.language,
+                    sites
+                });
             });
         });
     },
@@ -135,110 +170,34 @@ const VX = {
     },
 
     // Clean tracking query parameters and convert URL to sharing format.
-    // Scoping matters: on a recognized (rewritten) host we clean aggressively, but on
-    // any other URL we only strip unambiguous global trackers and otherwise leave the
-    // link untouched (functional params and #fragment preserved) so we never break it.
+    // Scoping: on a recognized (rewritten) host we clean aggressively; on any
+    // other URL we only strip unambiguous global trackers and otherwise leave
+    // the link untouched (functional params and #fragment preserved).
     convert(url) {
         try {
             const u = new URL(url);
-
             const h = u.hostname.replace(/^www\./, "");
-            // Subdomain handling differs per service:
-            // - Reddit serves the same post/comment paths on all subdomains
-            //   (old., new., np., i., m., ...), so match them all.
-            // - X/Twitter only has the legacy mobile. host as a content mirror.
-            // - Pixiv stays exact: its subdomains (sketch., dic., ...) are separate
-            //   products phixiv can't render, so rewriting them would break the link.
-            const isX = (h === "x.com" || h === "twitter.com" || h === "mobile.x.com" || h === "mobile.twitter.com");
-            const isReddit = (h === "reddit.com" || h.endsWith(".reddit.com"));
-            const isPixiv = (h === "pixiv.net");
-            const isBili = (h === "bilibili.com" || h.endsWith(".bilibili.com"));
 
-            // b23.tv is a shortener, not a content host. We can only build a working
-            // vxbilibili link when the short path already carries a recognizable video
-            // id (BV.../av...). Truly opaque codes (e.g. b23.tv/mUkdytX) can't be expanded
-            // without following the redirect — a network call convert() must not make —
-            // so those links are left untouched (clicking them still works).
-            const b23Id = (h === "b23.tv")
-                ? (u.pathname.match(/^\/(BV[0-9A-Za-z]{10}|av\d+)\/?$/) || [])[1]
-                : undefined;
-            const isB23Video = b23Id !== undefined;
+            VX.GLOBAL_TRACKERS.forEach(p => u.searchParams.delete(p));
 
-            const isSupported = isX || isReddit || isPixiv || isBili || isB23Video;
+            const site = VX.sites.find(s => {
+                try { return s.match && s.match(h, u); } catch (e) { return false; }
+            });
 
-            // Global trackers: unambiguous tracking/campaign params, safe to strip from
-            // ANY URL — they carry no content identity and never act as functional keys.
-            [
-                "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
-                "utm_id", "utm_custom",
-                "spm_id_from", "from_spmid", "from_spmid_from", "spmid", "spmid_from",
-                "share_spmid", "vd_source", "buvid", "buvid_from",
-                "share_source", "share_source_mutation", "share_medium", "share_plat",
-                "share_session_id", "share_tag", "share_tag_id", "share_id",
-                "share_medium_id", "share_plat_id", "share_channel", "share_token",
-                "share_origin", "share_session",
-                "ref_src", "refer_url", "mao2_medium", "mao2_source", "cover_shid",
-                "shid", "track_id", "signCoverage", "msource", "bsource", "ssource",
-                "csource", "vc_name", "vc_source", "ha_source", "ha_method",
-                "camp_id", "promotion_id", "ttk_id", "union_source", "branch_pid",
-                "fromsource"
-            ].forEach(p => u.searchParams.delete(p));
-
-            // Generic-but-risky params: these names are commonly used as FUNCTIONAL keys
-            // on arbitrary sites (search, redirects, sessions...), so only strip them once
-            // we've recognized the host as a supported, rewritten site.
-            if (isSupported) {
-                [
-                    "s", "from", "goto", "forward", "intro", "network", "platform",
-                    "session_id", "timestamp", "ts", "fr", "nm", "mx", "attach",
-                    "argv", "extension", "screenName", "seid", "plat_id", "webid",
-                    "bbid", "unique_k", "is_story_h5", "auto_play", "wifiAutoPlay",
-                    "preview_template", "mobile_pkg"
-                ].forEach(p => u.searchParams.delete(p));
-
-                // The fragment carries no share-relevant information on these sites.
-                u.hash = "";
+            if (site) {
+                VX.SITE_TRACKERS.forEach(p => u.searchParams.delete(p));
+                u.hash = ""; // no share-relevant fragment on supported sites
+                site.rewrite(u, h);
+                return u.toString().replace(/\/+$/, "");
             }
 
-            if (isX) {
-                u.hostname = "vxtwitter.com";
-                u.searchParams.delete("t"); // tracking token on X/Twitter share links
-            } else if (isReddit) {
-                u.hostname = "vxreddit.com";
-            } else if (isPixiv) {
-                u.hostname = "phixiv.net";
-            } else if (isBili || isB23Video) {
-                u.hostname = "vxbilibili.com";
-                // Expand a b23.tv short link's id into a real /video/ path so vxbilibili
-                // recognizes it (a bare /BV... or /<code> falls through to a non-video page).
-                if (isB23Video) u.pathname = "/video/" + b23Id;
-                // Whitelist: keep only params that identify the video/episode.
-                const biliAllowed = new Set([
-                    "p",          // video part index
-                    "t",          // timestamp start parameter
-                    "ep_id",      // episode ID
-                    "season_id",  // season ID
-                    "ssid",       // season ID alias
-                    "cid",        // video component ID
-                    "aid",        // video ID (avid)
-                    "bvid"        // video ID (bvid)
-                ]);
-                [...u.searchParams.keys()].forEach(k => {
-                    if (!biliAllowed.has(k)) u.searchParams.delete(k);
-                });
-            }
-
-            // Normalize trailing slashes only on rewritten hosts; leave arbitrary
-            // links' paths exactly as given.
-            let out = u.toString();
-            if (isSupported) out = out.replace(/\/+$/, "");
-            return out;
+            return u.toString();
         } catch (e) {
             return url;
         }
     },
 
-    // Initialize background script context menu and storage listeners
+    // Initialize background context menu and storage listeners
     initBackground() {
         const apis = typeof chrome !== 'undefined' ? chrome : (typeof browser !== 'undefined' ? browser : null);
         if (!apis) return;
@@ -256,14 +215,14 @@ const VX = {
             });
         };
 
-        // Listen for language changes in storage
+        // Re-title the menu when the language changes
         apis.storage.onChanged.addListener((changes, areaName) => {
             if (areaName === "sync" && changes.language) {
                 updateContextMenu();
             }
         });
 
-        // Listen for context menu clicks
+        // Handle context menu clicks
         apis.contextMenus.onClicked.addListener(async (info, tab) => {
             if (info.menuItemId !== "copy-vx-link") return;
             const strings = VX.getStrings(await VX.getCurrentLanguage());
@@ -275,7 +234,6 @@ const VX = {
             });
         });
 
-        // Initialize context menu with translated title
         updateContextMenu();
     },
 
@@ -287,10 +245,9 @@ const VX = {
 
         if (apis.scripting) {
             // MV3 service worker (Chrome / Safari). Selecting the context-menu item
-            // grants activeTab for the clicked tab, so executeScript succeeds even when
-            // that tab's host is not in host_permissions. The injected helper does the
-            // clipboard write inside the page (where a user gesture + focus exist) and
-            // shows a confirmation toast so the action is never silent.
+            // grants activeTab for the clicked tab, so executeScript succeeds even
+            // when that tab's host is not in host_permissions. The injected helper
+            // does the clipboard write in-page and shows a toast so it's never silent.
             try {
                 let tabId = opts.tabId;
                 if (tabId == null) {
@@ -319,9 +276,10 @@ const VX = {
         }
     },
 
-    // Injected into the target tab by executeScript (MV3). MUST be fully self-contained:
-    // it is serialized to source and runs in the page with no access to VX or any closure.
-    // Copies `text` (Clipboard API, with an execCommand fallback) and shows a brief toast.
+    // Injected into the target tab by executeScript (MV3). MUST be fully
+    // self-contained: it is serialized to source and runs in the page with no
+    // access to VX or any closure. Copies text (Clipboard API, execCommand
+    // fallback) and shows a brief toast.
     _copyAndToast: async function (text, okMsg, failMsg) {
         const showToast = (msg) => {
             if (!msg || !document.body) return;
@@ -337,7 +295,6 @@ const VX = {
         try {
             await navigator.clipboard.writeText(text);
         } catch (e) {
-            // Fallback when the async Clipboard API is unavailable or blocked.
             try {
                 const ta = document.createElement("textarea");
                 ta.value = text;

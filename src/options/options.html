@@ -37,39 +37,8 @@
                 <h2 data-i18n="enableSites">Enable Sites</h2>
                 <p class="section-desc" data-i18n="toggleDesc">Toggle VX button appearance on each site</p>
                 
-                <div class="toggle-grid">
-                    <div class="toggle-item">
-                        <div class="toggle-header">
-                            <input type="checkbox" id="site-x" class="site-toggle">
-                            <label for="site-x" class="site-label">X / Twitter</label>
-                        </div>
-                        <p class="site-desc">twitter.com, x.com</p>
-                    </div>
-
-                    <div class="toggle-item">
-                        <div class="toggle-header">
-                            <input type="checkbox" id="site-reddit" class="site-toggle">
-                            <label for="site-reddit" class="site-label">Reddit</label>
-                        </div>
-                        <p class="site-desc">reddit.com</p>
-                    </div>
-
-                    <div class="toggle-item">
-                        <div class="toggle-header">
-                            <input type="checkbox" id="site-bilibili" class="site-toggle">
-                            <label for="site-bilibili" class="site-label">Bilibili</label>
-                        </div>
-                        <p class="site-desc">bilibili.com</p>
-                    </div>
-
-                    <div class="toggle-item">
-                        <div class="toggle-header">
-                            <input type="checkbox" id="site-pixiv" class="site-toggle">
-                            <label for="site-pixiv" class="site-label">Pixiv</label>
-                        </div>
-                        <p class="site-desc">pixiv.net</p>
-                    </div>
-                </div>
+                <!-- Toggles are generated from the site registry by options.js -->
+                <div class="toggle-grid" id="toggle-grid"></div>
             </section>
 
             <!-- Credits Section -->
@@ -77,31 +46,8 @@
                 <h2 data-i18n="credits">Credits & Thanks</h2>
                 <p class="section-desc" data-i18n="creditsDesc">This plugin relies on the following amazing open-source projects:</p>
                 
-                <div class="credits-list">
-                    <div class="credit-item">
-                        <h3>VXTwitter</h3>
-                        <p data-i18n="creditTwitterDesc">Enhanced Twitter/X link viewer</p>
-                        <a href="https://vxtwitter.com" target="_blank">vxtwitter.com</a>
-                    </div>
-
-                    <div class="credit-item">
-                        <h3>VXReddit</h3>
-                        <p data-i18n="creditRedditDesc">Enhanced Reddit link viewer</p>
-                        <a href="https://vxreddit.com" target="_blank">vxreddit.com</a>
-                    </div>
-
-                    <div class="credit-item">
-                        <h3>VXBilibili</h3>
-                        <p data-i18n="creditBilibiliDesc">Enhanced Bilibili link viewer</p>
-                        <a href="https://vxbilibili.com" target="_blank">vxbilibili.com</a>
-                    </div>
-
-                    <div class="credit-item">
-                        <h3>PhiXiv</h3>
-                        <p data-i18n="creditPixivDesc">Enhanced Pixiv link viewer</p>
-                        <a href="https://phixiv.net" target="_blank">phixiv.net</a>
-                    </div>
-                </div>
+                <!-- Credits are generated from the site registry by options.js -->
+                <div class="credits-list" id="credits-list"></div>
             </section>
 
             <!-- Status Message -->
@@ -114,6 +60,7 @@
     </div>
 
     <script src="common.js"></script>
+    <script src="sites.js"></script>
     <script src="options.js"></script>
 </body>
 </html>
