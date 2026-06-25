@@ -5,20 +5,24 @@
 (function () {
 
     let strings = VX.getStrings("en");
+    let currentLang = "en";
     let settings = { sites: {} };
 
     // Load language + per-site toggles from storage.
     async function refresh() {
         settings = await VX.loadSettings();
-        strings = VX.getStrings(await VX.getCurrentLanguage());
+        currentLang = await VX.getCurrentLanguage();
+        strings = VX.getStrings(currentLang);
     }
 
     function toast(msg) {
+        const rtl = VX.isRTL(currentLang);
         const d = document.createElement("div");
         d.textContent = msg;
+        d.dir = rtl ? "rtl" : "ltr";
         d.style.cssText = `
             position:fixed;
-            right:20px;
+            ${rtl ? "left" : "right"}:20px;
             bottom:20px;
             z-index:2147483647;
             background:rgba(0,0,0,.85);

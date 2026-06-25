@@ -103,15 +103,24 @@ This is the core of the product. It MUST:
 
 ## 6. i18n contract
 
+- **Supported languages** (keys): `en`, `zh` (Simplified), `zh-TW` (Traditional), `es`, `ar`, `pt`,
+  `fr`, `ja`. `zh` stays the Simplified key for back-compat with stored settings. `TRANSLATIONS` key
+  order is the options-dropdown order. `getSystemLanguage()` maps the browser locale to one of these
+  (Traditional variants → `zh-TW`).
 - No hardcoded user-facing text. Common UI strings flow through `VX.TRANSLATIONS`, referenced by a
   `data-i18n` attribute in HTML or `getStrings()` in JS.
 - **Per-site** labels and credit text live in that site's `meta` (in `sites.js`), not in
   `TRANSLATIONS`; the options page renders them via `getSiteLabel` / `getCreditDesc`. So adding a
   site adds no keys to `TRANSLATIONS`.
-- A string added for one language MUST be added for **all** languages (in `TRANSLATIONS` for common
-  strings, in `meta.label`/`meta.credit.desc` for site strings).
-- Adding a language = add entries to `TRANSLATIONS` and `LANGUAGE_DISPLAY` (and each site's
-  `meta.*` maps); the options dropdown auto-populates, so don't hand-edit the option markup.
+- **Completeness:** every `TRANSLATIONS` key and every per-site `credit.desc` MUST exist in **all**
+  supported languages. A per-site `label` MAY omit languages — it falls back to `en` (labels are
+  usually brand names).
+- **RTL:** `VX.RTL_LANGUAGES` / `VX.isRTL(lang)` drives `dir="rtl"` on the options page and the
+  toast; keep new UI direction-agnostic (use logical CSS or branch on `isRTL`) rather than assuming
+  left-to-right.
+- Adding a language = add a block to `TRANSLATIONS` and a `LANGUAGE_DISPLAY` (native name) entry,
+  fill every site's `meta.credit.desc`, and (if RTL) add it to `RTL_LANGUAGES`; the options dropdown
+  auto-populates, so don't hand-edit the option markup.
 
 ## 7. Settings & storage contract
 
