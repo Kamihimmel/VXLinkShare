@@ -134,51 +134,65 @@ const VX = {
         });
     },
 
-    // Clean tracking query parameters and convert URL to sharing format
+    // Clean tracking query parameters and convert URL to sharing format.
+    // Scoping matters: on a recognized (rewritten) host we clean aggressively, but on
+    // any other URL we only strip unambiguous global trackers and otherwise leave the
+    // link untouched (functional params and #fragment preserved) so we never break it.
     convert(url) {
         try {
             const u = new URL(url);
-            u.hash = "";
-
-            // General tracking parameter blacklist (applies to all sites)
-            [
-                "spm_id_from", "from_spmid", "vd_source", "share_source",
-                "share_medium", "share_plat", "share_session_id", "share_tag",
-                "unique_k", "timestamp", "bbid", "s", "mx", "ref_src",
-                // Bilibili / General parameter extensions
-                "buvid", "buvid_from", "is_story_h5", "spmid", "spmid_from",
-                "share_spmid", "from", "fromsource", "seid", "plat_id", "ts",
-                "track_id", "signCoverage", "msource", "bsource", "ssource",
-                "mao2_medium", "mao2_source", "cover_shid", "shid", "refer_url",
-                "share_id", "share_medium_id", "share_plat_id", "share_channel",
-                "share_token", "share_origin", "share_session", "attach", "fr",
-                "extension", "argv", "auto_play", "preview_template", "forward",
-                "intro", "network", "platform", "wifiAutoPlay", "screenName", "nm",
-                "goto", "mobile_pkg", "camp_id", "vc_name", "vc_source", "csource",
-                "ha_source", "ha_method", "from_spmid_from", "share_source_mutation",
-                "session_id", "share_tag_id", "promotion_id", "ttk_id",
-                "union_source", "branch_pid", "webid",
-                // Standard Google Analytics campaign parameters
-                "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "utm_id", "utm_custom"
-            ].forEach(p => u.searchParams.delete(p));
 
             const h = u.hostname.replace(/^www\./, "");
-            let isBili = false;
+            const isX = (h === "x.com" || h === "twitter.com");
+            const isReddit = (h === "reddit.com");
+            const isPixiv = (h === "pixiv.net");
+            const isBili = (h === "bilibili.com" || h.endsWith(".bilibili.com") || h === "b23.tv");
+            const isSupported = isX || isReddit || isPixiv || isBili;
 
-            if (h === "x.com" || h === "twitter.com") {
-                u.hostname = "vxtwitter.com";
-                u.searchParams.delete("t"); // Strip t for X/Twitter specifically
-            } else if (h === "reddit.com") {
-                u.hostname = "vxreddit.com";
-            } else if (h === "pixiv.net") {
-                u.hostname = "phixiv.net";
-            } else if (h === "bilibili.com" || h.endsWith(".bilibili.com") || h === "b23.tv") {
-                u.hostname = "vxbilibili.com";
-                isBili = true;
+            // Global trackers: unambiguous tracking/campaign params, safe to strip from
+            // ANY URL — they carry no content identity and never act as functional keys.
+            [
+                "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
+                "utm_id", "utm_custom",
+                "spm_id_from", "from_spmid", "from_spmid_from", "spmid", "spmid_from",
+                "share_spmid", "vd_source", "buvid", "buvid_from",
+                "share_source", "share_source_mutation", "share_medium", "share_plat",
+                "share_session_id", "share_tag", "share_tag_id", "share_id",
+                "share_medium_id", "share_plat_id", "share_channel", "share_token",
+                "share_origin", "share_session",
+                "ref_src", "refer_url", "mao2_medium", "mao2_source", "cover_shid",
+                "shid", "track_id", "signCoverage", "msource", "bsource", "ssource",
+                "csource", "vc_name", "vc_source", "ha_source", "ha_method",
+                "camp_id", "promotion_id", "ttk_id", "union_source", "branch_pid",
+                "fromsource"
+            ].forEach(p => u.searchParams.delete(p));
+
+            // Generic-but-risky params: these names are commonly used as FUNCTIONAL keys
+            // on arbitrary sites (search, redirects, sessions...), so only strip them once
+            // we've recognized the host as a supported, rewritten site.
+            if (isSupported) {
+                [
+                    "s", "from", "goto", "forward", "intro", "network", "platform",
+                    "session_id", "timestamp", "ts", "fr", "nm", "mx", "attach",
+                    "argv", "extension", "screenName", "seid", "plat_id", "webid",
+                    "bbid", "unique_k", "is_story_h5", "auto_play", "wifiAutoPlay",
+                    "preview_template", "mobile_pkg"
+                ].forEach(p => u.searchParams.delete(p));
+
+                // The fragment carries no share-relevant information on these sites.
+                u.hash = "";
             }
 
-            // Bilibili Whitelist logic (only keep necessary parameters)
-            if (isBili) {
+            if (isX) {
+                u.hostname = "vxtwitter.com";
+                u.searchParams.delete("t"); // tracking token on X/Twitter share links
+            } else if (isReddit) {
+                u.hostname = "vxreddit.com";
+            } else if (isPixiv) {
+                u.hostname = "phixiv.net";
+            } else if (isBili) {
+                u.hostname = "vxbilibili.com";
+                // Whitelist: keep only params that identify the video/episode.
                 const biliAllowed = new Set([
                     "p",          // video part index
                     "t",          // timestamp start parameter
@@ -194,8 +208,11 @@ const VX = {
                 });
             }
 
-            // Standardize output URL structure (remove trailing slashes)
-            return u.toString().replace(/\/+$/, "");
+            // Normalize trailing slashes only on rewritten hosts; leave arbitrary
+            // links' paths exactly as given.
+            let out = u.toString();
+            if (isSupported) out = out.replace(/\/+$/, "");
+            return out;
         } catch (e) {
             return url;
         }
