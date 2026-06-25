@@ -19,6 +19,10 @@ for target in chrome firefox safari; do
     cp src/options/options.js "$target/options.js"
     cp src/options/options.css "$target/options.css"
     cp src/icon128.png "$target/icon128.png"
+    cp src/icon32.png "$target/icon32.png"
+    cp src/icon48.png "$target/icon48.png"
+    cp src/icon64.png "$target/icon64.png"
+    cp src/icon96.png "$target/icon96.png"
     echo "Copied shared assets to $target/"
 done
 

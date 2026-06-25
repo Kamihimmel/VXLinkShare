@@ -9,7 +9,11 @@ for target in chrome firefox safari; do
           "$target/options.html" \
           "$target/options.js" \
           "$target/options.css" \
-          "$target/icon128.png"
+          "$target/icon128.png"  \
+            "$target/icon32.png"   \
+            "$target/icon48.png"   \
+            "$target/icon64.png"   \
+            "$target/icon96.png"
     echo "Cleaned generated assets from $target/"
 done
 

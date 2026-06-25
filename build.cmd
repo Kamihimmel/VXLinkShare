@@ -17,6 +17,10 @@ for %%T in (chrome firefox safari) do (
     copy /y src\options\options.js %%T\options.js >nul
     copy /y src\options\options.css %%T\options.css >nul
     copy /y src\icon128.png %%T\icon128.png >nul
+    copy /y src\icon32.png %%T\icon32.png >nul
+    copy /y src\icon48.png %%T\icon48.png >nul
+    copy /y src\icon64.png %%T\icon64.png >nul
+    copy /y src\icon96.png %%T\icon96.png >nul 
     echo Copied shared assets to %%T/
 )
 

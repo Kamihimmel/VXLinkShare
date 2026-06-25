@@ -16,6 +16,10 @@ chrome/background.js
 chrome/options.html
 chrome/options.js
 chrome/options.css
+chrome/icon32.png
+chrome/icon48.png
+chrome/icon64.png
+chrome/icon96.png
 chrome/icon128.png
 
 # Generated build products in firefox/
@@ -26,6 +30,10 @@ firefox/background.js
 firefox/options.html
 firefox/options.js
 firefox/options.css
+firefox/icon32.png
+firefox/icon48.png
+firefox/icon64.png
+firefox/icon96.png
 firefox/icon128.png
 
 # Generated build products in safari/
@@ -36,4 +44,8 @@ safari/background.js
 safari/options.html
 safari/options.js
 safari/options.css
+safari/icon32.png
+safari/icon48.png
+safari/icon64.png
+safari/icon96.png
 safari/icon128.png

@@ -10,6 +10,10 @@ for %%T in (chrome firefox safari) do (
     if exist %%T\options.js del /f /q %%T\options.js
     if exist %%T\options.css del /f /q %%T\options.css
     if exist %%T\icon128.png del /f /q %%T\icon128.png
+    if exist %%T\icon32.png del /f /q %%T\icon32.png
+    if exist %%T\icon48.png del /f /q %%T\icon48.png
+    if exist %%T\icon64.png del /f /q %%T\icon64.png
+    if exist %%T\icon96.png del /f /q %%T\icon96.png
     echo Cleaned generated assets from %%T/
 )
 
