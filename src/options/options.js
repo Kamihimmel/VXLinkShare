@@ -2,8 +2,18 @@
 // Site settings and credits are generated from VX.sites; adding a site needs no
 // edit here unless it introduces a new kind of per-site option.
 
+const NO_REPLACEMENT_VALUE = "none";
+
 function siteSettingId(siteKey, settingKey) {
     return `site-${siteKey}-${settingKey}`;
+}
+
+function siteReplacementRadioId(siteKey, replacementKey) {
+    return `site-${siteKey}-replacement-${replacementKey}`;
+}
+
+function siteReplacementRadioName(siteKey) {
+    return `site-${siteKey}-replacement`;
 }
 
 function cloneDefaultSites() {
@@ -20,19 +30,25 @@ function getReplacementSettingKey(replacementKey) {
         : "replaceDomain" + replacementKey.charAt(0).toUpperCase() + replacementKey.slice(1);
 }
 
-function getSiteSettingDefinitions(site) {
+function getReplacementDefinitions(site) {
     const domains = VX.getReplacementDomains(site);
+    return Object.keys(domains).map((replacementKey) => ({
+        key: getReplacementSettingKey(replacementKey),
+        type: "replacement",
+        replacementKey,
+        domain: domains[replacementKey]
+    }));
+}
+
+function hasMultipleReplacementDomains(site) {
+    return getReplacementDefinitions(site).length > 1;
+}
+
+function getSiteSettingDefinitions(site) {
     const defs = [];
-
-    Object.keys(domains).forEach((replacementKey) => {
-        defs.push({
-            key: getReplacementSettingKey(replacementKey),
-            type: "replacement",
-            replacementKey,
-            domain: domains[replacementKey]
-        });
-    });
-
+    if (!hasMultipleReplacementDomains(site)) {
+        defs.push(...getReplacementDefinitions(site));
+    }
     defs.push({ key: "cleanTracking", type: "clean" });
     return defs;
 }
@@ -41,7 +57,24 @@ function getSettingLabel(def, strings) {
     if (def.type === "replacement") {
         return VX.formatString(strings.replaceDomainLabel, { domain: def.domain });
     }
+    if (def.type === "noReplacement") {
+        return strings.noReplacementLabel;
+    }
     return strings.cleanTrackingLabel;
+}
+
+function getSelectedReplacementKey(site, siteSettings) {
+    return VX.getActiveReplacementKey(site, siteSettings) || NO_REPLACEMENT_VALUE;
+}
+
+function setReplacementChoice(site, siteSettings, replacementKey) {
+    getReplacementDefinitions(site).forEach((def) => {
+        siteSettings[def.key] = false;
+    });
+    if (replacementKey !== NO_REPLACEMENT_VALUE) {
+        const selected = getReplacementDefinitions(site).find((def) => def.replacementKey === replacementKey);
+        if (selected) siteSettings[selected.key] = true;
+    }
 }
 
 // Build the site settings and credits from the registry (run once on load).
@@ -71,6 +104,45 @@ function renderSites() {
 
         const options = document.createElement("div");
         options.className = "site-options";
+
+        if (hasMultipleReplacementDomains(site)) {
+            const group = document.createElement("div");
+            group.className = "replacement-choice-group";
+            group.dataset.siteKey = site.key;
+
+            const hint = document.createElement("p");
+            hint.className = "site-option-hint";
+            hint.dataset.siteKey = site.key;
+            hint.textContent = VX.getStrings("en").replacementChoiceDesc;
+            group.appendChild(hint);
+
+            const noneDef = { key: "noReplacement", type: "noReplacement", replacementKey: NO_REPLACEMENT_VALUE };
+            [noneDef, ...getReplacementDefinitions(site)].forEach((def) => {
+                const row = document.createElement("div");
+                row.className = "toggle-header site-option";
+
+                const input = document.createElement("input");
+                input.type = "radio";
+                input.id = siteReplacementRadioId(site.key, def.replacementKey);
+                input.name = siteReplacementRadioName(site.key);
+                input.className = "site-replacement-radio";
+                input.value = def.replacementKey;
+                input.dataset.siteKey = site.key;
+
+                const label = document.createElement("label");
+                label.setAttribute("for", input.id);
+                label.className = "site-option-label replacement-option-label";
+                label.dataset.siteKey = site.key;
+                label.dataset.replacementKey = def.replacementKey;
+                label.textContent = getSettingLabel(def, VX.getStrings("en"));
+
+                row.appendChild(input);
+                row.appendChild(label);
+                group.appendChild(row);
+            });
+            options.appendChild(group);
+        }
+
         getSiteSettingDefinitions(site).forEach((def) => {
             const row = document.createElement("div");
             row.className = "toggle-header site-option";
@@ -151,6 +223,21 @@ async function updateUILanguage(languageOverride = null) {
         const label = document.querySelector(`.site-title[data-site-key="${site.key}"]`);
         if (label) label.textContent = VX.getSiteLabel(site, language);
 
+        const hint = document.querySelector(`.site-option-hint[data-site-key="${site.key}"]`);
+        if (hint) hint.textContent = strings.replacementChoiceDesc;
+
+        const noneLabel = document.querySelector(
+            `.replacement-option-label[data-site-key="${site.key}"][data-replacement-key="${NO_REPLACEMENT_VALUE}"]`
+        );
+        if (noneLabel) noneLabel.textContent = getSettingLabel({ type: "noReplacement" }, strings);
+
+        getReplacementDefinitions(site).forEach((def) => {
+            const replacementLabel = document.querySelector(
+                `.replacement-option-label[data-site-key="${site.key}"][data-replacement-key="${def.replacementKey}"]`
+            );
+            if (replacementLabel) replacementLabel.textContent = getSettingLabel(def, strings);
+        });
+
         getSiteSettingDefinitions(site).forEach((def) => {
             const optionLabel = document.querySelector(
                 `.site-option-label[data-site-key="${site.key}"][data-setting-key="${def.key}"]`
@@ -188,16 +275,21 @@ async function displaySettings() {
 
     document.getElementById("language").value = settings.language || VX.DEFAULT_SETTINGS.language;
 
-    // Set each site setting checkbox from settings (listeners are (re)attached after).
+    // Set each site setting checkbox/radio from settings (listeners are attached after).
     VX.sites.forEach((site) => {
         const siteSettings = VX.normalizeSiteSettings(site, settings.sites[site.key]);
+        if (hasMultipleReplacementDomains(site)) {
+            const selected = getSelectedReplacementKey(site, siteSettings);
+            const radio = document.getElementById(siteReplacementRadioId(site.key, selected));
+            if (radio) radio.checked = true;
+        }
         getSiteSettingDefinitions(site).forEach((def) => {
             const cb = document.getElementById(siteSettingId(site.key, def.key));
             if (cb) cb.checked = !!siteSettings[def.key];
         });
     });
 
-    attachCheckboxListeners();
+    attachInputListeners();
 }
 
 // Show status message
@@ -226,18 +318,38 @@ async function saveSiteSetting(siteKey, settingKey, checked) {
     }
 }
 
-// Attach change handlers to every site setting toggle (idempotent: clone-replace first).
-function attachCheckboxListeners() {
-    VX.sites.forEach((site) => {
-        getSiteSettingDefinitions(site).forEach((def) => {
-            const cb = document.getElementById(siteSettingId(site.key, def.key));
-            if (!cb) return;
-            const fresh = cb.cloneNode(true);
-            cb.parentNode.replaceChild(fresh, cb);
-            fresh.checked = cb.checked;
-            fresh.addEventListener("change", (e) => {
-                saveSiteSetting(site.key, def.key, e.target.checked);
-            });
+async function saveReplacementChoice(siteKey, replacementKey) {
+    try {
+        const settings = await VX.loadSettings();
+        const site = VX.sites.find((candidate) => candidate.key === siteKey);
+        if (!site) return;
+        settings.sites[siteKey] = VX.normalizeSiteSettings(site, settings.sites[siteKey]);
+        setReplacementChoice(site, settings.sites[siteKey], replacementKey);
+        await VX.saveSettings(settings);
+        const strings = VX.getStrings(await VX.getCurrentLanguage());
+        await showStatus(strings.savedSuccess);
+    } catch (error) {
+        console.error(`Error saving site-${siteKey} replacement choice:`, error);
+    }
+}
+
+// Attach change handlers to every site setting input (idempotent: clone-replace first).
+function attachInputListeners() {
+    document.querySelectorAll(".site-setting-toggle").forEach((input) => {
+        const fresh = input.cloneNode(true);
+        input.parentNode.replaceChild(fresh, input);
+        fresh.checked = input.checked;
+        fresh.addEventListener("change", (e) => {
+            saveSiteSetting(e.target.dataset.siteKey, e.target.dataset.settingKey, e.target.checked);
+        });
+    });
+
+    document.querySelectorAll(".site-replacement-radio").forEach((input) => {
+        const fresh = input.cloneNode(true);
+        input.parentNode.replaceChild(fresh, input);
+        fresh.checked = input.checked;
+        fresh.addEventListener("change", (e) => {
+            if (e.target.checked) saveReplacementChoice(e.target.dataset.siteKey, e.target.value);
         });
     });
 }

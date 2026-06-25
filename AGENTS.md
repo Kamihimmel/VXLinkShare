@@ -148,6 +148,10 @@ The options dropdown auto-populates from `TRANSLATIONS`, so never hand-edit the 
   an object of independent booleans: `replaceDomain`, `cleanTracking`, plus optional alternate
   replacement toggles such as Reddit's `replaceDomainRx`. Adding a site needs no core edit unless it
   introduces a new setting kind.
+- In the options UI, sites with more than one enhanced viewer/replacement domain MUST present those
+  domains as a radio group with an explicit “do not replace domain” choice. Single-domain sites can
+  keep a checkbox. Always explain near the radio group that choosing no replacement keeps the
+  original domain while other independent actions such as tracking cleanup can still run.
 - Schema changes stay backward compatible: a new setting needs a default in `DEFAULT_SETTINGS`
   and a fallback at every read site, so older synced data keeps working.
 
