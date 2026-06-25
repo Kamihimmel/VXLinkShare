@@ -272,25 +272,11 @@
         "aid",        // video ID (avid)
         "bvid"        // video ID (bvid)
     ]);
-    // b23.tv short paths we can expand client-side (id is already in the path).
-    const B23_ID = /^\/(BV[0-9A-Za-z]{10}|av\d+)\/?$/;
-
     VX.registerSite({
         key: "bilibili",
-        match: (h, u) => {
-            if (h === "bilibili.com" || h.endsWith(".bilibili.com")) return true;
-            // b23.tv is a shortener; only own it when the path carries a video id.
-            // Opaque codes (b23.tv/mUkdytX) can't be expanded without following the
-            // redirect (a network call convert() must not make), so we leave them.
-            if (h === "b23.tv") return B23_ID.test(u.pathname);
-            return false;
-        },
-        rewrite: (u, h) => {
+        match: (h) => h === "bilibili.com" || h.endsWith(".bilibili.com"),
+        rewrite: (u) => {
             u.hostname = "vxbilibili.com";
-            if (h === "b23.tv") {
-                const id = u.pathname.match(B23_ID)[1];
-                u.pathname = "/video/" + id;
-            }
         },
         clean: (u) => {
             // Whitelist: keep only params that identify the video/episode.
@@ -330,7 +316,7 @@
         },
         meta: {
             defaultEnabled: true,
-            domains: "bilibili.com, b23.tv",
+            domains: "bilibili.com",
             replacementDomains: { vx: "vxbilibili.com" },
             label: { en: "Bilibili", zh: "哔哩哔哩", "zh-TW": "嗶哩嗶哩" },
             credit: {

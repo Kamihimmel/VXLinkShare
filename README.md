@@ -12,7 +12,7 @@ along the way.
 | --------------------------- | ----------------- |
 | X / Twitter (`x.com`, `twitter.com`) | `vxtwitter.com`  |
 | Reddit (`reddit.com`, incl. `old.`, `np.`, …) | `vxreddit.com` |
-| Bilibili (`bilibili.com`, `b23.tv`)  | `vxbilibili.com` |
+| Bilibili (`bilibili.com`)  | `vxbilibili.com` |
 | Pixiv (`pixiv.net`)         | `phixiv.net`      |
 
 ## How to use

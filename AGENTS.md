@@ -13,12 +13,11 @@ Safari) that cleans shared links — strips tracking params and rewrites support
 | `x.com` / `twitter.com`      | `vxtwitter.com`  |
 | `reddit.com`                 | `vxreddit.com`   |
 | `pixiv.net`                  | `phixiv.net`     |
-| `bilibili.com` / `b23.tv`    | `vxbilibili.com` |
+| `bilibili.com`               | `vxbilibili.com` |
 
 *Matching also covers the obvious content subdomains (`old.`/`np.`/`m.`/… for Reddit, `mobile.`
-for X/Twitter); `b23.tv` is rewritten only when its short path already carries a video id; Pixiv
-stays exact (its `sketch.`/`dic.` subdomains are different products). The precise rules live in
-each site's `match`/`rewrite` in `sites.js`, not here.*
+for X/Twitter); Pixiv stays exact (its `sketch.`/`dic.` subdomains are different products).
+The precise rules live in each site's `match`/`rewrite` in `sites.js`, not here.*
 
 ---
 
