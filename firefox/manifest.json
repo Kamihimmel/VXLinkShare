@@ -21,7 +21,7 @@
     "*://*.pixiv.net/*"
   ],
   "background": {
-    "scripts": ["common.js", "background.js"]
+    "scripts": ["common.js", "sites.js", "background.js"]
   },
   "options_page": "options.html",
   "icons": {
@@ -36,7 +36,7 @@
         "*://*.reddit.com/*",
         "*://*.pixiv.net/*"
       ],
-      "js": ["common.js", "content.js"],
+      "js": ["common.js", "sites.js", "content.js"],
       "run_at": "document_idle"
     }
   ]

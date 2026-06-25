@@ -34,6 +34,7 @@
       ],
       "js": [
         "common.js",
+        "sites.js",
         "content.js"
       ],
       "run_at": "document_idle"

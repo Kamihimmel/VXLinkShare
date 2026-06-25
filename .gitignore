@@ -7,6 +7,7 @@ package-lock.json
 
 # Generated build products in chrome/
 chrome/common.js
+chrome/sites.js
 chrome/content.js
 chrome/background.js
 chrome/options.html
@@ -16,6 +17,7 @@ chrome/icon128.png
 
 # Generated build products in firefox/
 firefox/common.js
+firefox/sites.js
 firefox/content.js
 firefox/background.js
 firefox/options.html
@@ -25,6 +27,7 @@ firefox/icon128.png
 
 # Generated build products in safari/
 safari/common.js
+safari/sites.js
 safari/content.js
 safari/background.js
 safari/options.html

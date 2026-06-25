@@ -3,6 +3,7 @@ echo "Cleaning generated extension files..."
 
 for target in chrome firefox safari; do
     rm -f "$target/common.js" \
+          "$target/sites.js" \
           "$target/background.js" \
           "$target/content.js" \
           "$target/options.html" \

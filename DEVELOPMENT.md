@@ -9,10 +9,11 @@ Welcome to the VXLinkShare developer documentation. This document explains the a
 To prevent duplicate code, this extension uses a shared source system:
 
 *   **`src/` (Single Source of Truth)**: Contains all the shared components of the extension:
-    *   `src/common.js`: The core logic defining default settings, localized translations, storage wrapper helpers, and link cleanup rules.
-    *   `src/background.js`: The shared background script entry point that initializes the context menu and handles clipboard writing.
-    *   `src/content.js`: The shared UI script injected into pages.
-    *   `src/options/`: Shared options page styles, layout, and logic.
+    *   `src/common.js`: The core framework and `VX` global — default settings, common translations, storage helpers, the **site registry**, and the generic `convert()` link cleaner. Knows nothing about any specific site.
+    *   `src/sites.js`: Every supported site as a self-contained `VX.registerSite({...})` block (host matching, URL rewrite/allow-list, content-script button injection, and per-site metadata). Adding a site = add one block here. Loaded right after `common.js` in every context.
+    *   `src/background.js`: The shared background entry point that initializes the context menu and handles clipboard writing.
+    *   `src/content.js`: The shared content script — page-side machinery that dispatches to each matching site's injector from the registry.
+    *   `src/options/`: Shared options page styles, layout, and logic (toggles and credits are generated from the registry).
     *   `src/icon128.png`: Extension logo.
 *   **`chrome/`, `firefox/` & `safari/`**: Contain browser-specific files (such as `manifest.json` files). 
 *   **`.gitignore`**: Configured to ignore all compiled build files in `chrome/`, `firefox/`, and `safari/` to maintain a clean Git history.

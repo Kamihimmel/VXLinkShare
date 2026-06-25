@@ -10,6 +10,7 @@ if not exist safari mkdir safari
 
 for %%T in (chrome firefox safari) do (
     copy /y src\common.js %%T\common.js >nul
+    copy /y src\sites.js %%T\sites.js >nul
     copy /y src\background.js %%T\background.js >nul
     copy /y src\content.js %%T\content.js >nul
     copy /y src\options\options.html %%T\options.html >nul
