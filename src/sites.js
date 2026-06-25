@@ -103,14 +103,13 @@
                     display:inline-flex;
                     align-items:center;
                     justify-content:center;
-                    min-height:40px;
-                    padding:0 12px;
+                    min-height:32px;
+                    padding:0 8px;
                     margin-left:0;
                     border-radius:999px;
                     background:var(--color-secondary-background, rgba(255,255,255,.10));
                     color:var(--color-neutral-content-strong, currentColor);
-                    font-size:14px;
-                    line-height:20px;
+                    font-size:0.75rem;
                     font-weight:600;
                     opacity:1;
                     position:relative;
