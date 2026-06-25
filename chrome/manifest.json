@@ -6,7 +6,8 @@
   "permissions": [
     "contextMenus",
     "storage",
-    "scripting"
+    "scripting",
+    "activeTab"
   ],
   "host_permissions": [
       "*://*.x.com/*",

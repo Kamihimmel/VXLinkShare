@@ -24,6 +24,7 @@ const VX = {
         en: {
             menuTitle: "Copy VX Link",
             toastCopied: "Copied VX Link",
+            toastCopyFailed: "Copy failed",
             btnVX: "VX",
             title: "VX Link Helper Settings",
             language: "Language / 语言",
@@ -49,6 +50,7 @@ const VX = {
         zh: {
             menuTitle: "复制 VX 链接",
             toastCopied: "已复制 VX 链接",
+            toastCopyFailed: "复制失败",
             btnVX: "VX",
             title: "VX 链接助手 - 设置",
             language: "语言选择",
@@ -225,31 +227,45 @@ const VX = {
         });
 
         // Listen for context menu clicks
-        apis.contextMenus.onClicked.addListener(async (info) => {
+        apis.contextMenus.onClicked.addListener(async (info, tab) => {
             if (info.menuItemId !== "copy-vx-link") return;
+            const strings = VX.getStrings(await VX.getCurrentLanguage());
             const text = VX.convert(info.linkUrl);
-            await VX.writeToClipboard(text);
+            await VX.writeToClipboard(text, {
+                tabId: tab && tab.id,
+                toast: strings.toastCopied,
+                toastFail: strings.toastCopyFailed
+            });
         });
 
         // Initialize context menu with translated title
         updateContextMenu();
     },
 
-    // Write text to clipboard in a platform-compatible way
-    async writeToClipboard(text) {
+    // Write text to clipboard in a platform-compatible way.
+    // opts: { tabId?: number, toast?: string, toastFail?: string }
+    async writeToClipboard(text, opts = {}) {
         const apis = typeof chrome !== 'undefined' ? chrome : (typeof browser !== 'undefined' ? browser : null);
         if (!apis) return;
 
         if (apis.scripting) {
-            // MV3 Service Worker (Chrome)
+            // MV3 service worker (Chrome / Safari). Selecting the context-menu item
+            // grants activeTab for the clicked tab, so executeScript succeeds even when
+            // that tab's host is not in host_permissions. The injected helper does the
+            // clipboard write inside the page (where a user gesture + focus exist) and
+            // shows a confirmation toast so the action is never silent.
             try {
-                const [tab] = await apis.tabs.query({ active: true, currentWindow: true });
-                if (!tab || !tab.id) return;
+                let tabId = opts.tabId;
+                if (tabId == null) {
+                    const [tab] = await apis.tabs.query({ active: true, currentWindow: true });
+                    tabId = tab && tab.id;
+                }
+                if (tabId == null) return;
 
                 await apis.scripting.executeScript({
-                    target: { tabId: tab.id },
-                    args: [text],
-                    func: (t) => navigator.clipboard.writeText(t)
+                    target: { tabId },
+                    args: [text, opts.toast || "", opts.toastFail || ""],
+                    func: VX._copyAndToast
                 });
             } catch (e) {
                 console.error("[VX Link Helper] MV3 clipboard write failed:", e);
@@ -264,6 +280,44 @@ const VX = {
         } else {
             console.error("[VX Link Helper] Clipboard write not supported in this context");
         }
+    },
+
+    // Injected into the target tab by executeScript (MV3). MUST be fully self-contained:
+    // it is serialized to source and runs in the page with no access to VX or any closure.
+    // Copies `text` (Clipboard API, with an execCommand fallback) and shows a brief toast.
+    _copyAndToast: async function (text, okMsg, failMsg) {
+        const showToast = (msg) => {
+            if (!msg || !document.body) return;
+            const d = document.createElement("div");
+            d.textContent = msg;
+            d.style.cssText = "position:fixed;right:20px;bottom:20px;z-index:2147483647;" +
+                "background:rgba(0,0,0,.85);color:#fff;padding:8px 12px;border-radius:8px;" +
+                "font:13px sans-serif;pointer-events:none;";
+            document.body.appendChild(d);
+            setTimeout(() => d.remove(), 1500);
+        };
+
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch (e) {
+            // Fallback when the async Clipboard API is unavailable or blocked.
+            try {
+                const ta = document.createElement("textarea");
+                ta.value = text;
+                ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;";
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                const ok = document.execCommand("copy");
+                ta.remove();
+                if (!ok) throw new Error("execCommand copy returned false");
+            } catch (e2) {
+                showToast(failMsg);
+                return false;
+            }
+        }
+        showToast(okMsg);
+        return true;
     }
 };
 
