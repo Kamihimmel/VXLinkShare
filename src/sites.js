@@ -72,9 +72,21 @@
         rewrite: (u) => { u.hostname = "vxreddit.com"; },
         contentMatch: (host) => host.includes("reddit.com"),
         inject: (ctx) => {
-            const share = [...document.querySelectorAll("button,a")]
-                .find((el) => /share/i.test(el.textContent || ""));
-            if (!share || document.querySelector("[data-rxbtn]")) return;
+            // Bail before any scan once we've already injected (cheap on re-runs).
+            if (document.querySelector("[data-rxbtn]")) return;
+            const share =
+                // New Reddit (shreddit): the POST's own share control. Comment share
+                // buttons live in <shreddit-comment-share-button> outside <shreddit-post>,
+                // so scoping to shreddit-post skips them. Slot-based = language-independent.
+                document.querySelector('shreddit-post rpl-dropdown[slot="ssr-share-button"] button')
+                || document.querySelector('shreddit-post button[aria-label="Share" i]')
+                // Old Reddit / other layouts: first control whose accessible name is exactly
+                // "share" (not "shared by ...", a username containing "share", etc.).
+                || [...document.querySelectorAll("button, a")].find((el) => {
+                    const name = (el.getAttribute("aria-label") || el.textContent || "").trim().toLowerCase();
+                    return name === "share";
+                });
+            if (!share) return;
             const b = ctx.makeBtn(ctx.strings.btnVX, () => ctx.copyUrl(location.href));
             b.setAttribute("data-rxbtn", "1");
             share.insertAdjacentElement("afterend", b);
