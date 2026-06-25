@@ -6,7 +6,10 @@
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "vx-link-helper@yunlu18.net"
+      "id": "vx-link-helper@yunlu18.net",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   },
 
