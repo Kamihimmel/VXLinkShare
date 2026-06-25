@@ -131,7 +131,13 @@
                 const share = post.querySelector('rpl-dropdown[slot="ssr-share-button"] button')
                     || post.querySelector('button[aria-label="Share" i]')
                     || feedShareSlot(post)
-                    || post.querySelector("shreddit-post-share-button");
+                    || post.querySelector("shreddit-post-share-button")
+                    || post.querySelector('button[data-testid="share"]')
+                    // Home feed SSR can omit the action/share row entirely; the
+                    // per-post overflow menu is still present and is a stable,
+                    // item-scoped anchor, similar to X/Twitter's per-article
+                    // button selector strategy.
+                    || post.querySelector('shreddit-post-overflow-menu button[aria-label="Open user actions" i]');
                 addButton(share, postUrl(post), post);
             });
 
