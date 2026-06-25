@@ -86,3 +86,28 @@ To run the test suite:
 2. The browser will run the tests automatically and display a visual dashboard showing which test cases passed or failed.
 
 The test runner tests conversion rules for **X/Twitter, Reddit, Bilibili, Pixiv**, and general link cleaner safety checks.
+
+## 🧩 Running Content Injection Fixture Tests
+
+For site-specific content-script selectors and feed/list regressions, use checked-in HTML fixtures
+instead of relying on live external pages during normal verification.
+
+```bash
+node scripts/verify-content-fixtures.js
+```
+
+The runner loads fixture specs from `tests/content-fixtures.json`, parses each static page under
+`tests/fixtures/`, runs the matching site's `inject(ctx)` function, and verifies that:
+
+1. the expected number of VX buttons is inserted;
+2. running the injector twice is idempotent;
+3. copied URLs match the item-specific permalink after `VX.convert()`.
+
+To refresh or create a fixture from a live page without adding npm dependencies:
+
+```bash
+node scripts/capture-fixture.js https://www.reddit.com/ tests/fixtures/reddit-home-feed.html
+```
+
+`capture-fixture.js` saves raw server-rendered HTML. For pages that are mostly client-rendered,
+trim or edit the captured file into the smallest relevant static DOM before committing it.

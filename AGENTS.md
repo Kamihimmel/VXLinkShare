@@ -24,10 +24,11 @@ each site's `match`/`rewrite` in `sites.js`, not here.*
 
 ## 1. Architecture contract
 
-- **`src/` is the only place you write code.** The `chrome/`, `firefox/`, and `safari/` folders
-  hold exactly one hand-maintained file each — their `manifest.json`. Everything else there is
-  copied from `src/` by the build and is gitignored. Never hand-edit a generated copy; never
-  commit one.
+- **`src/` is the only place you write runtime extension code.** Test utilities may live under
+  `scripts/`, checked-in fixtures under `tests/fixtures/`, and test specs under `tests/`. The
+  `chrome/`, `firefox/`, and `safari/` folders hold exactly one hand-maintained file each — their
+  `manifest.json`. Everything else there is copied from `src/` by the build and is gitignored.
+  Never hand-edit a generated copy; never commit one.
 - **No toolchain creep.** The project MUST stay buildable by file copy alone (`build.sh` is just
   `cp`). Do not introduce npm packages, bundlers, transpilers, TypeScript, or UI frameworks.
   Runtime code is dependency-free vanilla JS/HTML/CSS.
@@ -201,11 +202,14 @@ blocks self-contained so they never conflict with each other or the core. (Only 
 
 ## 9. Definition of done
 
-1. Edited only under `src/` (+ manifests); ran `./build.sh` so platform copies match source.
+1. Edited runtime code only under `src/` (+ manifests), with test scripts/fixtures under `scripts/` or
+   `tests/` when needed; ran `./build.sh` so platform copies match source.
 2. `convert()`/params/site rules changed → `test.html` updated and fully green.
-3. New site = a `sites.js` block + its hosts in all three manifests + `test.html` cases (§8); no
+3. Site-specific content injection changed → add/update a checked-in fixture under `tests/fixtures/`
+   and run `node scripts/verify-content-fixtures.js`.
+4. New site = a `sites.js` block + its hosts in all three manifests + `test.html` cases (§8); no
    edits to core / content / options / `DEFAULT_SETTINGS` / `TRANSLATIONS`.
-4. New feature works on Chrome, Firefox, and Safari; manifests + load lists in sync (§1, §4).
-5. New/changed user-facing text covers every language (§6).
-6. Any doc this change makes false (README / DEVELOPMENT / this file) is updated in the same change.
-7. No generated files under `chrome/` / `firefox/` / `safari/` were committed.
+5. New feature works on Chrome, Firefox, and Safari; manifests + load lists in sync (§1, §4).
+6. New/changed user-facing text covers every language (§6).
+7. Any doc this change makes false (README / DEVELOPMENT / this file) is updated in the same change.
+8. No generated files under `chrome/` / `firefox/` / `safari/` were committed.
