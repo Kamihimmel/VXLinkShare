@@ -12,10 +12,23 @@ const VX = {
         sites: {}
     },
 
-    // Language display names (auto-populated in the options dropdown).
+    // Native language display names (auto-populated in the options dropdown).
+    // Dropdown order follows TRANSLATIONS key order.
     LANGUAGE_DISPLAY: {
         en: "English",
-        zh: "中文"
+        zh: "简体中文",
+        "zh-TW": "繁體中文",
+        es: "Español",
+        ar: "العربية",
+        pt: "Português",
+        fr: "Français",
+        ja: "日本語"
+    },
+
+    // Right-to-left languages — drives dir="rtl" in the options page and toast.
+    RTL_LANGUAGES: ["ar"],
+    isRTL(lang) {
+        return VX.RTL_LANGUAGES.indexOf(lang) !== -1;
     },
 
     // Common UI strings only. Per-site labels and credits live in each site's
@@ -27,7 +40,7 @@ const VX = {
             toastCopyFailed: "Copy failed",
             btnVX: "VX",
             title: "VX Link Helper Settings",
-            language: "Language / 语言",
+            language: "Language",
             selectLanguage: "Select Language:",
             systemDefault: "System Default",
             enableSites: "Enable Sites",
@@ -45,7 +58,7 @@ const VX = {
             toastCopyFailed: "复制失败",
             btnVX: "VX",
             title: "VX 链接助手 - 设置",
-            language: "语言选择",
+            language: "语言",
             selectLanguage: "选择语言:",
             systemDefault: "系统默认",
             enableSites: "启用网站",
@@ -56,6 +69,114 @@ const VX = {
             saveBtn: "保存设置",
             savedSuccess: "设置保存成功!",
             resetSuccess: "设置已重置为默认值!"
+        },
+        "zh-TW": {
+            menuTitle: "複製 VX 連結",
+            toastCopied: "已複製 VX 連結",
+            toastCopyFailed: "複製失敗",
+            btnVX: "VX",
+            title: "VX 連結助手 - 設定",
+            language: "語言",
+            selectLanguage: "選擇語言：",
+            systemDefault: "系統預設",
+            enableSites: "啟用網站",
+            toggleDesc: "在每個網站上切換 VX 按鈕的顯示",
+            credits: "致謝",
+            creditsDesc: "本擴充功能依賴以下優秀的開源專案：",
+            resetBtn: "重設為預設值",
+            saveBtn: "儲存設定",
+            savedSuccess: "設定儲存成功！",
+            resetSuccess: "設定已重設為預設值！"
+        },
+        es: {
+            menuTitle: "Copiar enlace VX",
+            toastCopied: "Enlace VX copiado",
+            toastCopyFailed: "Error al copiar",
+            btnVX: "VX",
+            title: "Configuración de VX Link Helper",
+            language: "Idioma",
+            selectLanguage: "Seleccionar idioma:",
+            systemDefault: "Predeterminado del sistema",
+            enableSites: "Activar sitios",
+            toggleDesc: "Activa o desactiva el botón VX en cada sitio",
+            credits: "Créditos y agradecimientos",
+            creditsDesc: "Esta extensión se apoya en los siguientes excelentes proyectos de código abierto:",
+            resetBtn: "Restablecer valores predeterminados",
+            saveBtn: "Guardar configuración",
+            savedSuccess: "¡Configuración guardada correctamente!",
+            resetSuccess: "¡Configuración restablecida a los valores predeterminados!"
+        },
+        ar: {
+            menuTitle: "نسخ رابط VX",
+            toastCopied: "تم نسخ رابط VX",
+            toastCopyFailed: "فشل النسخ",
+            btnVX: "VX",
+            title: "إعدادات VX Link Helper",
+            language: "اللغة",
+            selectLanguage: "اختر اللغة:",
+            systemDefault: "افتراضي النظام",
+            enableSites: "تفعيل المواقع",
+            toggleDesc: "تبديل ظهور زر VX في كل موقع",
+            credits: "شكر وتقدير",
+            creditsDesc: "يعتمد هذا الملحق على مشاريع المصدر المفتوح الرائعة التالية:",
+            resetBtn: "إعادة التعيين إلى الافتراضي",
+            saveBtn: "حفظ الإعدادات",
+            savedSuccess: "تم حفظ الإعدادات بنجاح!",
+            resetSuccess: "تمت إعادة تعيين الإعدادات إلى الافتراضي!"
+        },
+        pt: {
+            menuTitle: "Copiar link VX",
+            toastCopied: "Link VX copiado",
+            toastCopyFailed: "Falha ao copiar",
+            btnVX: "VX",
+            title: "Configurações do VX Link Helper",
+            language: "Idioma",
+            selectLanguage: "Selecionar idioma:",
+            systemDefault: "Padrão do sistema",
+            enableSites: "Ativar sites",
+            toggleDesc: "Ative ou desative o botão VX em cada site",
+            credits: "Créditos e agradecimentos",
+            creditsDesc: "Esta extensão depende dos seguintes excelentes projetos de código aberto:",
+            resetBtn: "Redefinir para o padrão",
+            saveBtn: "Salvar configurações",
+            savedSuccess: "Configurações salvas com sucesso!",
+            resetSuccess: "Configurações redefinidas para o padrão!"
+        },
+        fr: {
+            menuTitle: "Copier le lien VX",
+            toastCopied: "Lien VX copié",
+            toastCopyFailed: "Échec de la copie",
+            btnVX: "VX",
+            title: "Paramètres de VX Link Helper",
+            language: "Langue",
+            selectLanguage: "Choisir la langue :",
+            systemDefault: "Par défaut du système",
+            enableSites: "Activer les sites",
+            toggleDesc: "Afficher ou masquer le bouton VX sur chaque site",
+            credits: "Crédits et remerciements",
+            creditsDesc: "Cette extension s'appuie sur les excellents projets open source suivants :",
+            resetBtn: "Réinitialiser",
+            saveBtn: "Enregistrer les paramètres",
+            savedSuccess: "Paramètres enregistrés avec succès !",
+            resetSuccess: "Paramètres réinitialisés !"
+        },
+        ja: {
+            menuTitle: "VXリンクをコピー",
+            toastCopied: "VXリンクをコピーしました",
+            toastCopyFailed: "コピーに失敗しました",
+            btnVX: "VX",
+            title: "VX Link Helper の設定",
+            language: "言語",
+            selectLanguage: "言語を選択:",
+            systemDefault: "システムのデフォルト",
+            enableSites: "サイトを有効化",
+            toggleDesc: "各サイトでの VX ボタンの表示を切り替えます",
+            credits: "クレジットと謝辞",
+            creditsDesc: "この拡張機能は、以下の素晴らしいオープンソースプロジェクトを利用しています:",
+            resetBtn: "デフォルトに戻す",
+            saveBtn: "設定を保存",
+            savedSuccess: "設定を保存しました！",
+            resetSuccess: "設定をデフォルトに戻しました！"
         }
     },
 
@@ -109,13 +230,16 @@ const VX = {
         "preview_template", "mobile_pkg"
     ],
 
-    // Get browser/system language
+    // Map the browser/system language to one of our supported keys.
     getSystemLanguage() {
-        const browserLang = navigator.language || navigator.userLanguage;
-        if (browserLang && browserLang.startsWith("zh")) {
-            return "zh";
+        const raw = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+        if (raw.indexOf("zh") === 0) {
+            // Traditional variants (zh-TW/HK/MO, *-Hant) -> zh-TW; the rest -> Simplified.
+            return /(^zh-(tw|hk|mo))|hant/.test(raw) ? "zh-TW" : "zh";
         }
-        return "en";
+        const primary = raw.split("-")[0];
+        const supported = { en: 1, es: 1, ar: 1, pt: 1, fr: 1, ja: 1 };
+        return supported[primary] ? primary : "en";
     },
 
     // Get active language from sync storage
@@ -225,12 +349,14 @@ const VX = {
         // Handle context menu clicks
         apis.contextMenus.onClicked.addListener(async (info, tab) => {
             if (info.menuItemId !== "copy-vx-link") return;
-            const strings = VX.getStrings(await VX.getCurrentLanguage());
+            const language = await VX.getCurrentLanguage();
+            const strings = VX.getStrings(language);
             const text = VX.convert(info.linkUrl);
             await VX.writeToClipboard(text, {
                 tabId: tab && tab.id,
                 toast: strings.toastCopied,
-                toastFail: strings.toastCopyFailed
+                toastFail: strings.toastCopyFailed,
+                rtl: VX.isRTL(language)
             });
         });
 
@@ -238,7 +364,7 @@ const VX = {
     },
 
     // Write text to clipboard in a platform-compatible way.
-    // opts: { tabId?: number, toast?: string, toastFail?: string }
+    // opts: { tabId?: number, toast?: string, toastFail?: string, rtl?: boolean }
     async writeToClipboard(text, opts = {}) {
         const apis = typeof chrome !== 'undefined' ? chrome : (typeof browser !== 'undefined' ? browser : null);
         if (!apis) return;
@@ -258,7 +384,7 @@ const VX = {
 
                 await apis.scripting.executeScript({
                     target: { tabId },
-                    args: [text, opts.toast || "", opts.toastFail || ""],
+                    args: [text, opts.toast || "", opts.toastFail || "", !!opts.rtl],
                     func: VX._copyAndToast
                 });
             } catch (e) {
@@ -280,14 +406,15 @@ const VX = {
     // self-contained: it is serialized to source and runs in the page with no
     // access to VX or any closure. Copies text (Clipboard API, execCommand
     // fallback) and shows a brief toast.
-    _copyAndToast: async function (text, okMsg, failMsg) {
+    _copyAndToast: async function (text, okMsg, failMsg, rtl) {
         const showToast = (msg) => {
             if (!msg || !document.body) return;
             const d = document.createElement("div");
             d.textContent = msg;
-            d.style.cssText = "position:fixed;right:20px;bottom:20px;z-index:2147483647;" +
-                "background:rgba(0,0,0,.85);color:#fff;padding:8px 12px;border-radius:8px;" +
-                "font:13px sans-serif;pointer-events:none;";
+            d.dir = rtl ? "rtl" : "ltr";
+            d.style.cssText = "position:fixed;" + (rtl ? "left" : "right") + ":20px;bottom:20px;" +
+                "z-index:2147483647;background:rgba(0,0,0,.85);color:#fff;padding:8px 12px;" +
+                "border-radius:8px;font:13px sans-serif;pointer-events:none;";
             document.body.appendChild(d);
             setTimeout(() => d.remove(), 1500);
         };

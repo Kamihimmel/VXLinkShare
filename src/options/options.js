@@ -69,6 +69,10 @@ async function updateUILanguage(languageOverride = null) {
         language = VX.getSystemLanguage();
     }
 
+    // Reflect language + reading direction on the page (RTL for Arabic).
+    document.documentElement.lang = language;
+    document.documentElement.dir = VX.isRTL(language) ? "rtl" : "ltr";
+
     const strings = VX.getStrings(language);
 
     document.title = strings.title;

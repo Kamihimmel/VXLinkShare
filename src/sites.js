@@ -55,11 +55,20 @@
         meta: {
             defaultEnabled: true,
             domains: "twitter.com, x.com",
-            label: { en: "X / Twitter", zh: "X / 推特" },
+            label: { en: "X / Twitter", zh: "X / 推特", "zh-TW": "X / 推特" },
             credit: {
                 name: "VXTwitter",
                 url: "https://vxtwitter.com",
-                desc: { en: "Enhanced Twitter/X link viewer", zh: "增强型 Twitter/X 链接查看器" }
+                desc: {
+                    en: "Enhanced Twitter/X link viewer",
+                    zh: "增强型 Twitter/X 链接查看器",
+                    "zh-TW": "增強型 Twitter/X 連結檢視器",
+                    es: "Visor mejorado de enlaces de Twitter/X",
+                    ar: "عارض محسّن لروابط Twitter/X",
+                    pt: "Visualizador aprimorado de links do Twitter/X",
+                    fr: "Lecteur de liens Twitter/X amélioré",
+                    ja: "Twitter/X リンクの強化ビューア"
+                }
             }
         }
     });
@@ -98,7 +107,16 @@
             credit: {
                 name: "VXReddit",
                 url: "https://vxreddit.com",
-                desc: { en: "Enhanced Reddit link viewer", zh: "增强型 Reddit 链接查看器" }
+                desc: {
+                    en: "Enhanced Reddit link viewer",
+                    zh: "增强型 Reddit 链接查看器",
+                    "zh-TW": "增強型 Reddit 連結檢視器",
+                    es: "Visor mejorado de enlaces de Reddit",
+                    ar: "عارض محسّن لروابط Reddit",
+                    pt: "Visualizador aprimorado de links do Reddit",
+                    fr: "Lecteur de liens Reddit amélioré",
+                    ja: "Reddit リンクの強化ビューア"
+                }
             }
         }
     });
@@ -127,7 +145,16 @@
             credit: {
                 name: "PhiXiv",
                 url: "https://phixiv.net",
-                desc: { en: "Enhanced Pixiv link viewer", zh: "增强型 Pixiv 链接查看器" }
+                desc: {
+                    en: "Enhanced Pixiv link viewer",
+                    zh: "增强型 Pixiv 链接查看器",
+                    "zh-TW": "增強型 Pixiv 連結檢視器",
+                    es: "Visor mejorado de enlaces de Pixiv",
+                    ar: "عارض محسّن لروابط Pixiv",
+                    pt: "Visualizador aprimorado de links do Pixiv",
+                    fr: "Lecteur de liens Pixiv amélioré",
+                    ja: "Pixiv リンクの強化ビューア"
+                }
             }
         }
     });
@@ -200,11 +227,20 @@
         meta: {
             defaultEnabled: true,
             domains: "bilibili.com, b23.tv",
-            label: { en: "Bilibili", zh: "哔哩哔哩" },
+            label: { en: "Bilibili", zh: "哔哩哔哩", "zh-TW": "嗶哩嗶哩" },
             credit: {
                 name: "VXBilibili",
                 url: "https://vxbilibili.com",
-                desc: { en: "Enhanced Bilibili link viewer", zh: "增强型哔哩哔哩链接查看器" }
+                desc: {
+                    en: "Enhanced Bilibili link viewer",
+                    zh: "增强型哔哩哔哩链接查看器",
+                    "zh-TW": "增強型嗶哩嗶哩連結檢視器",
+                    es: "Visor mejorado de enlaces de Bilibili",
+                    ar: "عارض محسّن لروابط Bilibili",
+                    pt: "Visualizador aprimorado de links do Bilibili",
+                    fr: "Lecteur de liens Bilibili amélioré",
+                    ja: "Bilibili リンクの強化ビューア"
+                }
             }
         }
     });
