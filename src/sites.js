@@ -90,8 +90,13 @@
                 return href ? new URL(href, location.origin).href : location.href;
             };
 
+            const hasButton = (scope) => !!(
+                scope.querySelector("[data-rxbtn]")
+                || scope.shadowRoot?.querySelector("[data-rxbtn]")
+            );
+
             const addButton = (anchor, url, scope) => {
-                if (!anchor || scope.querySelector("[data-rxbtn]")) return;
+                if (!anchor || hasButton(scope)) return;
                 const b = ctx.makeBtn(ctx.strings.btnVX, () => ctx.copyUrl(url));
                 b.setAttribute("data-rxbtn", "1");
                 anchor.insertAdjacentElement("afterend", b);
@@ -113,12 +118,16 @@
             };
 
             const feedShareSlot = (post) => {
-                const slots = [...post.querySelectorAll(".shreddit-post-container > slot")];
-                return slots.find(slotHasShare)
-                    // Reddit home feed can expose the post share control through the
-                    // fourth slot even when the assigned custom element is hidden from
-                    // light-DOM queries in content scripts.
-                    || post.querySelector(".shreddit-post-container > slot:nth-child(4)");
+                const roots = [post.shadowRoot, post].filter(Boolean);
+                for (const root of roots) {
+                    const slots = [...root.querySelectorAll(".shreddit-post-container > slot")];
+                    const shareSlot = slots.find(slotHasShare)
+                        // Reddit home feed exposes the bottom action row inside the
+                        // post shadow root; the share control is the fourth slot.
+                        || root.querySelector(".shreddit-post-container > slot:nth-child(4)");
+                    if (shareSlot) return shareSlot;
+                }
+                return null;
             };
 
             // New Reddit feed/permalink pages render each post as <shreddit-post>.
