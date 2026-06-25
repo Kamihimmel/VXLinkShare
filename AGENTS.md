@@ -118,9 +118,26 @@ This is the core of the product. It MUST:
 - **RTL:** `VX.RTL_LANGUAGES` / `VX.isRTL(lang)` drives `dir="rtl"` on the options page and the
   toast; keep new UI direction-agnostic (use logical CSS or branch on `isRTL`) rather than assuming
   left-to-right.
-- Adding a language = add a block to `TRANSLATIONS` and a `LANGUAGE_DISPLAY` (native name) entry,
-  fill every site's `meta.credit.desc`, and (if RTL) add it to `RTL_LANGUAGES`; the options dropdown
-  auto-populates, so don't hand-edit the option markup.
+### Adding or changing a UI string
+
+- **Common string** (`TRANSLATIONS`): add/rename the key in **every** language block — not just
+  `en` — and reference it via a `data-i18n` attribute (HTML) or `getStrings()` (JS). Never inline a
+  literal. If you can't translate a language yet, still add the key (English placeholder is better
+  than a missing key, which would render the raw key or fall back unpredictably).
+- **Per-site string**: edit that site's `meta` in `sites.js` — `credit.desc` for **every** language;
+  `label` only if it differs from the brand name (it falls back to `en`).
+- Don't leave a key present in some languages and absent in others (see **Completeness** above).
+
+### Adding a new language
+
+1. Add a full `TRANSLATIONS["<code>"]` block with **every** existing key translated.
+2. Add its **native** name to `LANGUAGE_DISPLAY["<code>"]` (this is the dropdown label; order
+   follows `TRANSLATIONS`).
+3. Fill each site's `meta.credit.desc["<code>"]` in `sites.js`.
+4. If it reads right-to-left, add the code to `RTL_LANGUAGES`.
+5. Make sure `getSystemLanguage()` can map a relevant browser locale to it.
+
+The options dropdown auto-populates from `TRANSLATIONS`, so never hand-edit the `<option>` markup.
 
 ## 7. Settings & storage contract
 
