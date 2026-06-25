@@ -5,6 +5,9 @@ package-lock.json
 # OS files
 .DS_Store
 
+# Local development lock
+yoyo.lock
+
 # Generated build products in chrome/
 chrome/common.js
 chrome/sites.js
