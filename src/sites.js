@@ -99,6 +99,24 @@
                 if (!anchor || hasButton(scope)) return;
                 const b = ctx.makeBtn(ctx.strings.btnVX, () => ctx.copyUrl(url));
                 b.setAttribute("data-rxbtn", "1");
+                b.style.cssText += `
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    min-height:40px;
+                    padding:0 16px;
+                    margin-left:8px;
+                    border-radius:999px;
+                    background:var(--color-secondary-background, rgba(255,255,255,.10));
+                    color:var(--color-neutral-content-strong, currentColor);
+                    font-weight:600;
+                    opacity:1;
+                    position:relative;
+                    z-index:4;
+                    pointer-events:auto;
+                `;
+                b.addEventListener("mouseenter", () => { b.style.opacity = "1"; });
+                b.addEventListener("mouseleave", () => { b.style.opacity = "1"; });
                 anchor.insertAdjacentElement("afterend", b);
             };
 
