@@ -81,6 +81,25 @@
         }
     }
 
+    // Coalesce bursts of DOM mutations. SPAs (X/Reddit/Bilibili feeds) mutate the
+    // DOM constantly; calling run() per mutation would re-scan hundreds of times a
+    // second. Instead queue at most one run per ~200ms, aligned to a frame. run() is
+    // idempotent (each site bails once its button exists), so re-scanning after the
+    // DOM settles is enough — and a trailing run always fires, so nothing is missed.
+    const now = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
+    let pending = false;
+    let lastRun = 0;
+    function scheduleRun() {
+        if (pending) return;
+        pending = true;
+        const wait = Math.max(0, 200 - (now() - lastRun));
+        setTimeout(() => requestAnimationFrame(() => {
+            pending = false;
+            lastRun = now();
+            run();
+        }), wait);
+    }
+
     // React to settings changes (toggles / language) without a reload.
     chrome.storage.onChanged.addListener((changes, areaName) => {
         if (areaName === "sync" && (changes.sites || changes.language)) {
@@ -90,7 +109,7 @@
 
     // Load settings/language first, then observe and run.
     refresh().then(() => {
-        new MutationObserver(run).observe(document.documentElement, {
+        new MutationObserver(scheduleRun).observe(document.documentElement, {
             childList: true,
             subtree: true
         });
