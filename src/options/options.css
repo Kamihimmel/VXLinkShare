@@ -186,7 +186,8 @@ main {
     margin-bottom: 0;
 }
 
-.toggle-header input[type="checkbox"] {
+.toggle-header input[type="checkbox"],
+.toggle-header input[type="radio"] {
     width: 18px;
     height: 18px;
     flex: 0 0 auto;
@@ -215,6 +216,20 @@ main {
     color: var(--text-main);
     cursor: pointer;
     user-select: none;
+}
+
+.site-option-hint {
+    font-size: 11px;
+    line-height: 16px;
+    color: var(--text-muted);
+    margin: 0 0 2px;
+}
+
+.replacement-choice-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 2px;
 }
 
 .site-desc {
