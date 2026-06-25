@@ -97,16 +97,27 @@
                 anchor.insertAdjacentElement("afterend", b);
             };
 
+            const slotHasShare = (slot) => {
+                const assigned = typeof slot.assignedElements === "function"
+                    ? slot.assignedElements({ flatten: true })
+                    : [];
+                return assigned.some((el) => el.matches?.("shreddit-post-share-button"));
+            };
+
+            const feedShareSlot = (post) => [...post.querySelectorAll(".shreddit-post-container > slot")]
+                .find((slot) => slot.querySelector?.("shreddit-post-share-button") || slotHasShare(slot));
+
             // New Reddit feed/permalink pages render each post as <shreddit-post>.
-            // Feed rows use the custom <shreddit-post-share-button>; permalink pages
-            // may expose the SSR dropdown/button instead. Scope per post so one button
-            // on the feed does not block injection on later posts, and so copied URLs
-            // point at the individual post instead of reddit.com/.
+            // Keep the permalink-page insertion point on the post's own button (the
+            // original correct placement), while homepage/feed cards expose their share
+            // control through a slot under .shreddit-post-container. Scope per post so
+            // one button on the feed does not block injection on later posts, and so
+            // copied URLs point at the individual post instead of reddit.com/.
             document.querySelectorAll("shreddit-post").forEach((post) => {
-                const share = post.querySelector("shreddit-post-share-button")
-                    || post.querySelector('rpl-dropdown[slot="ssr-share-button"]')
-                    || post.querySelector('rpl-dropdown[slot="ssr-share-button"] button')
-                    || post.querySelector('button[aria-label="Share" i]');
+                const share = post.querySelector('rpl-dropdown[slot="ssr-share-button"] button')
+                    || post.querySelector('button[aria-label="Share" i]')
+                    || feedShareSlot(post)
+                    || post.querySelector("shreddit-post-share-button");
                 addButton(share, postUrl(post), post);
             });
 
