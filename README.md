@@ -68,9 +68,14 @@ chrome/  firefox/  safari/   # each holds its manifest.json; rest is built outpu
 
 ## Credits
 
-Built on these open-source preview services: **VXTwitter**, **VXReddit**, **VXBilibili**,
-and **PhiXiv**.
+Built on these open-source preview services: **VXTwitter**, **VXReddit**, **RXddit**,
+**VXBilibili**, and **PhiXiv**.
 
 ## License
 
-Private project at the moment.
+VX Link Helper is open source under the **Mozilla Public License 2.0**. See
+[LICENSE](LICENSE) for the full license text.
+
+The project name and logo are trademarks of the maintainers. The MPL-2.0 license covers
+the source code, but it does not grant permission to present unofficial builds as the
+official VX Link Helper release.
