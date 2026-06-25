@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Reddit home feed fixture</title>
+</head>
+<body>
+    <main id="feed">
+        <shreddit-post permalink="/r/pics/comments/abc123/first_fixture_post/">
+            <article>
+                <a href="/r/pics/comments/abc123/first_fixture_post/">First fixture post</a>
+                <rpl-dropdown slot="ssr-share-button">
+                    <button aria-label="Share">Share</button>
+                </rpl-dropdown>
+            </article>
+        </shreddit-post>
+
+        <shreddit-post data-permalink="/r/videos/comments/def456/second_fixture_post/">
+            <article>
+                <a href="/r/videos/comments/def456/second_fixture_post/">Second fixture post</a>
+                <shreddit-post-overflow-menu>
+                    <button aria-label="Open user actions">...</button>
+                </shreddit-post-overflow-menu>
+            </article>
+        </shreddit-post>
+    </main>
+</body>
+</html>

@@ -1,0 +1,15 @@
+[
+  {
+    "name": "Reddit home feed injects one VX button per post",
+    "fixture": "tests/fixtures/reddit-home-feed.html",
+    "url": "https://www.reddit.com/",
+    "site": "reddit",
+    "buttonSelector": "[data-rxbtn]",
+    "scopeSelector": "shreddit-post",
+    "expectedButtons": 2,
+    "expectedCopies": [
+      "https://vxreddit.com/r/pics/comments/abc123/first_fixture_post",
+      "https://vxreddit.com/r/videos/comments/def456/second_fixture_post"
+    ]
+  }
+]
