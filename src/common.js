@@ -152,8 +152,19 @@ const VX = {
             const isX = (h === "x.com" || h === "twitter.com" || h === "mobile.x.com" || h === "mobile.twitter.com");
             const isReddit = (h === "reddit.com" || h.endsWith(".reddit.com"));
             const isPixiv = (h === "pixiv.net");
-            const isBili = (h === "bilibili.com" || h.endsWith(".bilibili.com") || h === "b23.tv");
-            const isSupported = isX || isReddit || isPixiv || isBili;
+            const isBili = (h === "bilibili.com" || h.endsWith(".bilibili.com"));
+
+            // b23.tv is a shortener, not a content host. We can only build a working
+            // vxbilibili link when the short path already carries a recognizable video
+            // id (BV.../av...). Truly opaque codes (e.g. b23.tv/mUkdytX) can't be expanded
+            // without following the redirect — a network call convert() must not make —
+            // so those links are left untouched (clicking them still works).
+            const b23Id = (h === "b23.tv")
+                ? (u.pathname.match(/^\/(BV[0-9A-Za-z]{10}|av\d+)\/?$/) || [])[1]
+                : undefined;
+            const isB23Video = b23Id !== undefined;
+
+            const isSupported = isX || isReddit || isPixiv || isBili || isB23Video;
 
             // Global trackers: unambiguous tracking/campaign params, safe to strip from
             // ANY URL — they carry no content identity and never act as functional keys.
@@ -196,8 +207,11 @@ const VX = {
                 u.hostname = "vxreddit.com";
             } else if (isPixiv) {
                 u.hostname = "phixiv.net";
-            } else if (isBili) {
+            } else if (isBili || isB23Video) {
                 u.hostname = "vxbilibili.com";
+                // Expand a b23.tv short link's id into a real /video/ path so vxbilibili
+                // recognizes it (a bare /BV... or /<code> falls through to a non-video page).
+                if (isB23Video) u.pathname = "/video/" + b23Id;
                 // Whitelist: keep only params that identify the video/episode.
                 const biliAllowed = new Set([
                     "p",          // video part index
