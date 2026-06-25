@@ -476,6 +476,21 @@ const VX = {
             }
         });
 
+        const openOptionsPage = () => {
+            if (apis.runtime && typeof apis.runtime.openOptionsPage === "function") {
+                apis.runtime.openOptionsPage();
+                return;
+            }
+            if (apis.tabs && apis.runtime && typeof apis.runtime.getURL === "function") {
+                apis.tabs.create({ url: apis.runtime.getURL("options.html") });
+            }
+        };
+
+        const toolbarAction = apis.action || apis.browserAction;
+        if (toolbarAction && toolbarAction.onClicked) {
+            toolbarAction.onClicked.addListener(openOptionsPage);
+        }
+
         // Handle context menu clicks
         apis.contextMenus.onClicked.addListener(async (info, tab) => {
             if (info.menuItemId !== "copy-vx-link") return;
