@@ -43,7 +43,7 @@ sends your links nowhere.
 - Mozilla Firefox (Manifest V2)
 - Apple Safari (Manifest V3)
 
-The options page offers per-site toggles and a language switch (English / 中文).
+The options page offers per-site controls for domain replacement, tracking cleanup, Reddit's alternate `rxddit.com` domain, and a language switch.
 
 ## Install & build
 

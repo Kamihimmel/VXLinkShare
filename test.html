@@ -266,6 +266,30 @@
                 expected: "https://vxreddit.com/r/pics/comments/xyz"
             },
             {
+                name: "Reddit clean only leaves original domain",
+                input: "https://www.reddit.com/r/pics/comments/xyz/?utm_source=share&ref_src=twsrc",
+                settings: { sites: { reddit: { replaceDomain: false, cleanTracking: true, replaceDomainRx: false } } },
+                expected: "https://www.reddit.com/r/pics/comments/xyz"
+            },
+            {
+                name: "Reddit replace only keeps tracking params",
+                input: "https://www.reddit.com/r/pics/comments/xyz/?utm_source=share&ref_src=twsrc#comments",
+                settings: { sites: { reddit: { replaceDomain: true, cleanTracking: false, replaceDomainRx: false } } },
+                expected: "https://vxreddit.com/r/pics/comments/xyz/?utm_source=share&ref_src=twsrc#comments"
+            },
+            {
+                name: "Reddit RX replacement option",
+                input: "https://www.reddit.com/r/pics/comments/xyz/?utm_source=share&ref_src=twsrc",
+                settings: { sites: { reddit: { replaceDomain: true, cleanTracking: true, replaceDomainRx: true } } },
+                expected: "https://rxddit.com/r/pics/comments/xyz"
+            },
+            {
+                name: "Reddit disabled replacement and cleanup leaves supported URL unchanged",
+                input: "https://www.reddit.com/r/pics/comments/xyz/?utm_source=share&ref_src=twsrc#comments",
+                settings: { sites: { reddit: { replaceDomain: false, cleanTracking: false, replaceDomainRx: false } } },
+                expected: "https://www.reddit.com/r/pics/comments/xyz/?utm_source=share&ref_src=twsrc#comments"
+            },
+            {
                 name: "Bilibili blacklist param removal and whitelist retention",
                 input: "https://www.bilibili.com/video/BV12345/?spm_id_from=333.788&vd_source=abc&p=2&t=45&some_garbage=123",
                 expected: "https://vxbilibili.com/video/BV12345/?p=2&t=45"
@@ -335,7 +359,7 @@
             let failedCount = 0;
 
             testCases.forEach((tc) => {
-                const actual = VX.convert(tc.input);
+                const actual = VX.convert(tc.input, tc.settings);
                 const passed = actual === tc.expected;
                 
                 if (!passed) {

@@ -173,9 +173,22 @@ main {
     margin-bottom: 8px;
 }
 
+.site-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.site-option {
+    align-items: flex-start;
+    margin-bottom: 0;
+}
+
 .toggle-header input[type="checkbox"] {
     width: 18px;
     height: 18px;
+    flex: 0 0 auto;
     cursor: pointer;
     accent-color: var(--primary);
     filter: saturate(1.2);
@@ -184,6 +197,20 @@ main {
 .site-label {
     font-weight: 600;
     font-size: 14px;
+    color: var(--text-main);
+    cursor: pointer;
+    user-select: none;
+}
+
+.site-title {
+    cursor: default;
+    margin-bottom: 8px;
+}
+
+.site-option-label {
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 18px;
     color: var(--text-main);
     cursor: pointer;
     user-select: none;
