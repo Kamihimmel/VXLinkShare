@@ -278,6 +278,21 @@
                 name: "Unrelated sites cleaning generic trackers",
                 input: "https://example.com/page?q=hello&spm_id_from=some_tracker&ref_src=direct",
                 expected: "https://example.com/page?q=hello"
+            },
+            {
+                name: "Unrelated site: keep functional params & #fragment, strip only trackers",
+                input: "https://example.com/search?s=hello&from=nav&utm_source=ads#section",
+                expected: "https://example.com/search?s=hello&from=nav#section"
+            },
+            {
+                name: "Unrelated site: preserve hash-based routing",
+                input: "https://docs.example.com/guide#/route/inside-app",
+                expected: "https://docs.example.com/guide#/route/inside-app"
+            },
+            {
+                name: "Unrelated site: keep session_id/goto, strip spm/ref_src",
+                input: "https://shop.example.com/item?session_id=KEEP&goto=checkout&spm_id_from=x&ref_src=y",
+                expected: "https://shop.example.com/item?session_id=KEEP&goto=checkout"
             }
         ];
 
