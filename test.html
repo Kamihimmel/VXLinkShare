@@ -293,6 +293,21 @@
                 name: "Unrelated site: keep session_id/goto, strip spm/ref_src",
                 input: "https://shop.example.com/item?session_id=KEEP&goto=checkout&spm_id_from=x&ref_src=y",
                 expected: "https://shop.example.com/item?session_id=KEEP&goto=checkout"
+            },
+            {
+                name: "Reddit subdomain (old.) is converted",
+                input: "https://old.reddit.com/r/pics/comments/xyz/?utm_source=share",
+                expected: "https://vxreddit.com/r/pics/comments/xyz"
+            },
+            {
+                name: "Twitter mobile subdomain is converted",
+                input: "https://mobile.twitter.com/user/status/12345?s=20",
+                expected: "https://vxtwitter.com/user/status/12345"
+            },
+            {
+                name: "Pixiv non-artwork subdomain is NOT rewritten (different product)",
+                input: "https://sketch.pixiv.net/items/123",
+                expected: "https://sketch.pixiv.net/items/123"
             }
         ];
 

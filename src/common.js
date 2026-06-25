@@ -143,8 +143,14 @@ const VX = {
             const u = new URL(url);
 
             const h = u.hostname.replace(/^www\./, "");
-            const isX = (h === "x.com" || h === "twitter.com");
-            const isReddit = (h === "reddit.com");
+            // Subdomain handling differs per service:
+            // - Reddit serves the same post/comment paths on all subdomains
+            //   (old., new., np., i., m., ...), so match them all.
+            // - X/Twitter only has the legacy mobile. host as a content mirror.
+            // - Pixiv stays exact: its subdomains (sketch., dic., ...) are separate
+            //   products phixiv can't render, so rewriting them would break the link.
+            const isX = (h === "x.com" || h === "twitter.com" || h === "mobile.x.com" || h === "mobile.twitter.com");
+            const isReddit = (h === "reddit.com" || h.endsWith(".reddit.com"));
             const isPixiv = (h === "pixiv.net");
             const isBili = (h === "bilibili.com" || h.endsWith(".bilibili.com") || h === "b23.tv");
             const isSupported = isX || isReddit || isPixiv || isBili;
