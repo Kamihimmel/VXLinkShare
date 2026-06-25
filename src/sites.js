@@ -97,15 +97,29 @@
                 anchor.insertAdjacentElement("afterend", b);
             };
 
+            const hasPostShareButton = (el) => !!(
+                el && (
+                    el.matches?.("shreddit-post-share-button")
+                    || el.querySelector?.("shreddit-post-share-button")
+                )
+            );
+
             const slotHasShare = (slot) => {
+                if (hasPostShareButton(slot)) return true;
                 const assigned = typeof slot.assignedElements === "function"
                     ? slot.assignedElements({ flatten: true })
                     : [];
-                return assigned.some((el) => el.matches?.("shreddit-post-share-button"));
+                return assigned.some(hasPostShareButton);
             };
 
-            const feedShareSlot = (post) => [...post.querySelectorAll(".shreddit-post-container > slot")]
-                .find((slot) => slot.querySelector?.("shreddit-post-share-button") || slotHasShare(slot));
+            const feedShareSlot = (post) => {
+                const slots = [...post.querySelectorAll(".shreddit-post-container > slot")];
+                return slots.find(slotHasShare)
+                    // Reddit home feed can expose the post share control through the
+                    // fourth slot even when the assigned custom element is hidden from
+                    // light-DOM queries in content scripts.
+                    || post.querySelector(".shreddit-post-container > slot:nth-child(4)");
+            };
 
             // New Reddit feed/permalink pages render each post as <shreddit-post>.
             // Keep the permalink-page insertion point on the post's own button (the
@@ -117,7 +131,13 @@
                 const share = post.querySelector('rpl-dropdown[slot="ssr-share-button"] button')
                     || post.querySelector('button[aria-label="Share" i]')
                     || feedShareSlot(post)
-                    || post.querySelector("shreddit-post-share-button");
+                    || post.querySelector("shreddit-post-share-button")
+                    || post.querySelector('button[data-testid="share"]')
+                    // Home feed SSR can omit the action/share row entirely; the
+                    // per-post overflow menu is still present and is a stable,
+                    // item-scoped anchor, similar to X/Twitter's per-article
+                    // button selector strategy.
+                    || post.querySelector('shreddit-post-overflow-menu button[aria-label="Open user actions" i]');
                 addButton(share, postUrl(post), post);
             });
 
