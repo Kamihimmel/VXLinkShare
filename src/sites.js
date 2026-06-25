@@ -81,24 +81,43 @@
         rewrite: (u) => { u.hostname = "vxreddit.com"; },
         contentMatch: (host) => host.includes("reddit.com"),
         inject: (ctx) => {
-            // Bail before any scan once we've already injected (cheap on re-runs).
+            const postUrl = (post) => {
+                const permalink = post.getAttribute("permalink") || post.getAttribute("data-permalink");
+                if (permalink) return new URL(permalink, location.origin).href;
+
+                const link = post.querySelector('a[href*="/comments/"]');
+                const href = link && link.getAttribute("href");
+                return href ? new URL(href, location.origin).href : location.href;
+            };
+
+            const addButton = (anchor, url, scope) => {
+                if (!anchor || scope.querySelector("[data-rxbtn]")) return;
+                const b = ctx.makeBtn(ctx.strings.btnVX, () => ctx.copyUrl(url));
+                b.setAttribute("data-rxbtn", "1");
+                anchor.insertAdjacentElement("afterend", b);
+            };
+
+            // New Reddit feed/permalink pages render each post as <shreddit-post>.
+            // Feed rows use the custom <shreddit-post-share-button>; permalink pages
+            // may expose the SSR dropdown/button instead. Scope per post so one button
+            // on the feed does not block injection on later posts, and so copied URLs
+            // point at the individual post instead of reddit.com/.
+            document.querySelectorAll("shreddit-post").forEach((post) => {
+                const share = post.querySelector("shreddit-post-share-button")
+                    || post.querySelector('rpl-dropdown[slot="ssr-share-button"]')
+                    || post.querySelector('rpl-dropdown[slot="ssr-share-button"] button')
+                    || post.querySelector('button[aria-label="Share" i]');
+                addButton(share, postUrl(post), post);
+            });
+
+            // Old Reddit / other layouts: first control whose accessible name is exactly
+            // "share" (not "shared by ...", a username containing "share", etc.).
             if (document.querySelector("[data-rxbtn]")) return;
-            const share =
-                // New Reddit (shreddit): the POST's own share control. Comment share
-                // buttons live in <shreddit-comment-share-button> outside <shreddit-post>,
-                // so scoping to shreddit-post skips them. Slot-based = language-independent.
-                document.querySelector('shreddit-post rpl-dropdown[slot="ssr-share-button"] button')
-                || document.querySelector('shreddit-post button[aria-label="Share" i]')
-                // Old Reddit / other layouts: first control whose accessible name is exactly
-                // "share" (not "shared by ...", a username containing "share", etc.).
-                || [...document.querySelectorAll("button, a")].find((el) => {
-                    const name = (el.getAttribute("aria-label") || el.textContent || "").trim().toLowerCase();
-                    return name === "share";
-                });
-            if (!share) return;
-            const b = ctx.makeBtn(ctx.strings.btnVX, () => ctx.copyUrl(location.href));
-            b.setAttribute("data-rxbtn", "1");
-            share.insertAdjacentElement("afterend", b);
+            const legacyShare = [...document.querySelectorAll("button, a")].find((el) => {
+                const name = (el.getAttribute("aria-label") || el.textContent || "").trim().toLowerCase();
+                return name === "share";
+            });
+            addButton(legacyShare, location.href, document);
         },
         meta: {
             defaultEnabled: true,
