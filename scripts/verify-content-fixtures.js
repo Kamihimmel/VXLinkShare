@@ -394,6 +394,18 @@ function runFixture(spec, VX) {
             }
         });
     }
+    if (spec.expectedPreviousSiblingContainsAriaLabelPattern) {
+        const pattern = new RegExp(spec.expectedPreviousSiblingContainsAriaLabelPattern);
+        buttons.forEach((button, index) => {
+            const siblings = button.parentElement ? button.parentElement.children : [];
+            const buttonIndex = siblings.indexOf(button);
+            const previous = buttonIndex > 0 ? siblings[buttonIndex - 1] : null;
+            const labels = previous ? previous.querySelectorAll("[aria-label]").map((el) => el.getAttribute("aria-label") || "") : [];
+            if (!labels.some((label) => pattern.test(label))) {
+                failures.push(`button ${index + 1} previous sibling descendant aria-label mismatch: expected /${spec.expectedPreviousSiblingContainsAriaLabelPattern}/, got ${JSON.stringify(labels)}`);
+            }
+        });
+    }
 
     return { name: spec.name, failures };
 }

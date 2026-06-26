@@ -53,15 +53,12 @@
                 const label = (anchor.getAttribute("aria-label") || "").trim().toLowerCase();
                 if (label !== "bookmark" || !anchor.parentElement) return anchor;
 
-                // X renders the bookmark count as a separate button immediately after
-                // the bookmark icon. Insert VX after that count so the action row stays
-                // in the native order: bookmark icon -> count -> VX -> share.
-                const siblings = anchor.parentElement.children || [];
-                const index = siblings.indexOf ? siblings.indexOf(anchor) : Array.prototype.indexOf.call(siblings, anchor);
-                if (index < 0) return anchor;
-                const count = siblings[index + 1];
-                const countLabel = count && (count.getAttribute("aria-label") || "").trim();
-                return countLabel && /^\d+(?:[.,]\d+)?[KMB]?$/i.test(countLabel) ? count : anchor;
+                // X wraps the bookmark icon and count in a hover group. Inserting VX
+                // inside that group makes bookmark and VX highlight together. Place VX
+                // after the whole action item instead: bookmark icon + count -> VX -> share.
+                const actionItem = anchor.closest("div.inline-flex");
+                if (actionItem && actionItem.parentElement) return actionItem;
+                return anchor;
             };
 
             const addButton = (anchor) => {
