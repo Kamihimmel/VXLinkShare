@@ -68,6 +68,10 @@
                 if (!insertionAnchor.parentElement || scope.querySelector("[data-vxbtn]")) return;
                 const b = ctx.makeBtn(ctx.strings.btnVX, () => ctx.copyUrl(tweetUrlFor(article)));
                 b.setAttribute("data-vxbtn", "1");
+                // X/Twitter does not reliably expose its font stack through inheritance
+                // to injected buttons. Match the computed tweet text fallback stack so
+                // VX does not fall back to Times New Roman on Chrome/Firefox.
+                b.style.fontFamily = 'TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
                 insertionAnchor.insertAdjacentElement("afterend", b);
             };
 
