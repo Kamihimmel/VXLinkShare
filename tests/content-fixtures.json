@@ -11,5 +11,18 @@
       "https://vxreddit.com/r/pics/comments/abc123/first_fixture_post",
       "https://vxreddit.com/r/videos/comments/def456/second_fixture_post"
     ]
+  },
+  {
+    "name": "X logged-out status page injects VX button",
+    "fixture": "tests/fixtures/x-logged-out-status.html",
+    "url": "https://x.com/d0nut2x/status/2070449680123572700",
+    "site": "x",
+    "buttonSelector": "[data-vxbtn]",
+    "scopeSelector": "article",
+    "expectedButtons": 1,
+    "expectedCopies": [
+      "https://vxtwitter.com/d0nut2x/status/2070449680123572700"
+    ],
+    "expectedPreviousSiblingContainsAriaLabelPattern": "^\\d+(?:[.,]\\d+)?[KMB]?$"
   }
 ]
