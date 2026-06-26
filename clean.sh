@@ -14,6 +14,7 @@ for target in chrome firefox safari; do
             "$target/icon48.png"   \
             "$target/icon64.png"   \
             "$target/icon96.png"
+    rm -rf "$target/_locales"
     echo "Cleaned generated assets from $target/"
 done
 

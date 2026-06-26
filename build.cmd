@@ -21,6 +21,8 @@ for %%T in (chrome firefox safari) do (
     copy /y src\icon48.png %%T\icon48.png >nul
     copy /y src\icon64.png %%T\icon64.png >nul
     copy /y src\icon96.png %%T\icon96.png >nul 
+    if exist %%T\_locales rmdir /s /q %%T\_locales
+    xcopy /e /i /y src\_locales %%T\_locales >nul
     echo Copied shared assets to %%T/
 )
 

@@ -21,6 +21,7 @@ chrome/icon48.png
 chrome/icon64.png
 chrome/icon96.png
 chrome/icon128.png
+chrome/_locales/
 
 # Generated build products in firefox/
 firefox/common.js
@@ -35,6 +36,7 @@ firefox/icon48.png
 firefox/icon64.png
 firefox/icon96.png
 firefox/icon128.png
+firefox/_locales/
 
 # Generated build products in safari/
 safari/common.js
@@ -49,3 +51,4 @@ safari/icon48.png
 safari/icon64.png
 safari/icon96.png
 safari/icon128.png
+safari/_locales/

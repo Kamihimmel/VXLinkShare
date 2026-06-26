@@ -23,6 +23,8 @@ for target in chrome firefox safari; do
     cp src/icon48.png "$target/icon48.png"
     cp src/icon64.png "$target/icon64.png"
     cp src/icon96.png "$target/icon96.png"
+    rm -rf "$target/_locales"
+    cp -R src/_locales "$target/_locales"
     echo "Copied shared assets to $target/"
 done
 

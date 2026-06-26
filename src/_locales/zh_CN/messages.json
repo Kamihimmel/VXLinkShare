@@ -1,0 +1,18 @@
+{
+  "extName": {
+    "message": "VX 链接助手 V3",
+    "description": "Extension name shown in browser extension stores and management UI."
+  },
+  "extShortName": {
+    "message": "VX 链接助手",
+    "description": "Short extension name for constrained UI surfaces."
+  },
+  "extDescription": {
+    "message": "本地复制适合预览的 VX 链接并清理追踪参数。",
+    "description": "Short store/manifest description based on the README: copy embed-friendly links and clean tracking locally."
+  },
+  "extActionTitle": {
+    "message": "VX 链接助手",
+    "description": "Toolbar button title that opens the settings page."
+  }
+}
