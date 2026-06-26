@@ -1,0 +1,18 @@
+{
+  "extName": {
+    "message": "VX Link Helper V3",
+    "description": "Extension name shown in browser extension stores and management UI."
+  },
+  "extShortName": {
+    "message": "VX Link Helper",
+    "description": "Short extension name for constrained UI surfaces."
+  },
+  "extDescription": {
+    "message": "Copia enlaces VX aptos para vistas previas y limpia parámetros de seguimiento localmente.",
+    "description": "Short store/manifest description based on the README: copy embed-friendly links and clean tracking locally."
+  },
+  "extActionTitle": {
+    "message": "VX Link Helper",
+    "description": "Toolbar button title that opens the settings page."
+  }
+}

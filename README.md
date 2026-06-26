@@ -63,7 +63,7 @@ chrome/  firefox/  safari/   # each holds its manifest.json; rest is built outpu
 ## Roadmap
 
 - More supported sites (each is one block in `src/sites.js`).
-- Bundle web fonts locally and add `_locales` for store-ready packaging.
+- Bundle web fonts locally and keep store-ready `_locales` metadata in sync with the extension languages.
 - Distribution via the Chrome Web Store / Firefox Add-ons.
 
 ## Credits

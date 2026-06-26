@@ -14,6 +14,7 @@ for %%T in (chrome firefox safari) do (
     if exist %%T\icon48.png del /f /q %%T\icon48.png
     if exist %%T\icon64.png del /f /q %%T\icon64.png
     if exist %%T\icon96.png del /f /q %%T\icon96.png
+    if exist %%T\_locales rmdir /s /q %%T\_locales
     echo Cleaned generated assets from %%T/
 )
 
