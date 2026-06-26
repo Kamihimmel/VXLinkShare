@@ -32,28 +32,48 @@
         },
         contentMatch: (host) => host.includes("x.com") || host.includes("twitter.com"),
         inject: (ctx) => {
-            document.querySelectorAll('button[data-testid="bookmark"]').forEach((el) => {
-                const parent = el.parentElement;
-                if (!parent || parent.querySelector("[data-vxbtn]")) return;
-
-                // Find this article's own tweet permalink so the button copies the
-                // specific tweet, not just the current page.
-                let tweetUrl = null;
-                const article = el.closest("article");
-                if (article) {
-                    for (const link of article.querySelectorAll('a[href*="/status/"]')) {
-                        const href = link.getAttribute("href");
-                        if (href && /\/status\/\d+/.test(href)) {
-                            tweetUrl = new URL(href, location.origin).href;
-                            break;
-                        }
+            const tweetUrlFor = (article) => {
+                if (!article) return location.href;
+                for (const link of article.querySelectorAll('a[href*="/status/"]')) {
+                    const href = link.getAttribute("href");
+                    if (href && /\/status\/\d+/.test(href)) {
+                        return new URL(href, location.origin).href;
                     }
                 }
+                const tweetId = article.getAttribute("data-tweet-id");
+                if (tweetId && /^\d+$/.test(tweetId)) {
+                    const pathMatch = location.pathname.match(/^\/([^/]+)\/status\//);
+                    const handle = pathMatch ? pathMatch[1] : "i";
+                    return new URL(`/${handle}/status/${tweetId}`, location.origin).href;
+                }
+                return location.href;
+            };
 
-                const b = ctx.makeBtn(ctx.strings.btnVX, () => ctx.copyUrl(tweetUrl || location.href));
+            const addButton = (anchor) => {
+                const article = anchor.closest("article");
+                const scope = article || anchor.parentElement || document;
+                if (!anchor.parentElement || scope.querySelector("[data-vxbtn]")) return;
+                const b = ctx.makeBtn(ctx.strings.btnVX, () => ctx.copyUrl(tweetUrlFor(article)));
                 b.setAttribute("data-vxbtn", "1");
-                el.insertAdjacentElement("afterend", b);
+                anchor.insertAdjacentElement("afterend", b);
+            };
+
+            // Logged-in X currently exposes a data-testid bookmark button. Logged-out
+            // permalink pages use only accessible-label buttons and place the share
+            // control at the end of the action row, so fall back to those selectors.
+            document.querySelectorAll("article").forEach((article) => {
+                const anchor = article.querySelector('button[data-testid="bookmark"]')
+                    || article.querySelector('button[aria-label="Bookmark" i]')
+                    || article.querySelector('button[aria-label="Share" i]');
+                if (anchor) addButton(anchor);
             });
+
+            // Last-resort fallback for non-article layouts.
+            if (document.querySelector("[data-vxbtn]")) return;
+            const fallback = document.querySelector('button[data-testid="bookmark"]')
+                || document.querySelector('button[aria-label="Bookmark" i]')
+                || document.querySelector('button[aria-label="Share" i]');
+            if (fallback) addButton(fallback);
         },
         meta: {
             defaultEnabled: true,
