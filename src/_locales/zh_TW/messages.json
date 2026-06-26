@@ -4,7 +4,7 @@
     "description": "Extension name shown in browser extension stores and management UI."
   },
   "extShortName": {
-    "message": "VX 連結助手",
+    "message": "VX Link",
     "description": "Short extension name for constrained UI surfaces."
   },
   "extDescription": {
