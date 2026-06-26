@@ -49,13 +49,29 @@
                 return location.href;
             };
 
+            const insertionAnchorFor = (anchor) => {
+                const label = (anchor.getAttribute("aria-label") || "").trim().toLowerCase();
+                if (label !== "bookmark" || !anchor.parentElement) return anchor;
+
+                // X renders the bookmark count as a separate button immediately after
+                // the bookmark icon. Insert VX after that count so the action row stays
+                // in the native order: bookmark icon -> count -> VX -> share.
+                const siblings = anchor.parentElement.children || [];
+                const index = siblings.indexOf ? siblings.indexOf(anchor) : Array.prototype.indexOf.call(siblings, anchor);
+                if (index < 0) return anchor;
+                const count = siblings[index + 1];
+                const countLabel = count && (count.getAttribute("aria-label") || "").trim();
+                return countLabel && /^\d+(?:[.,]\d+)?[KMB]?$/i.test(countLabel) ? count : anchor;
+            };
+
             const addButton = (anchor) => {
                 const article = anchor.closest("article");
                 const scope = article || anchor.parentElement || document;
-                if (!anchor.parentElement || scope.querySelector("[data-vxbtn]")) return;
+                const insertionAnchor = insertionAnchorFor(anchor);
+                if (!insertionAnchor.parentElement || scope.querySelector("[data-vxbtn]")) return;
                 const b = ctx.makeBtn(ctx.strings.btnVX, () => ctx.copyUrl(tweetUrlFor(article)));
                 b.setAttribute("data-vxbtn", "1");
-                anchor.insertAdjacentElement("afterend", b);
+                insertionAnchor.insertAdjacentElement("afterend", b);
             };
 
             // Logged-in X currently exposes a data-testid bookmark button. Logged-out

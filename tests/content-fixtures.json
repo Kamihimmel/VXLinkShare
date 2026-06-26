@@ -22,6 +22,7 @@
     "expectedButtons": 1,
     "expectedCopies": [
       "https://vxtwitter.com/d0nut2x/status/2070449680123572700"
-    ]
+    ],
+    "expectedPreviousSiblingAriaLabelPattern": "^\\d+(?:[.,]\\d+)?[KMB]?$"
   }
 ]

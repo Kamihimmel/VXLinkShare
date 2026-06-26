@@ -382,6 +382,18 @@ function runFixture(spec, VX) {
     if (JSON.stringify(copied) !== JSON.stringify(spec.expectedCopies)) {
         failures.push(`copied URLs mismatch\n  expected: ${JSON.stringify(spec.expectedCopies)}\n  actual:   ${JSON.stringify(copied)}`);
     }
+    if (spec.expectedPreviousSiblingAriaLabelPattern) {
+        const pattern = new RegExp(spec.expectedPreviousSiblingAriaLabelPattern);
+        buttons.forEach((button, index) => {
+            const siblings = button.parentElement ? button.parentElement.children : [];
+            const buttonIndex = siblings.indexOf(button);
+            const previous = buttonIndex > 0 ? siblings[buttonIndex - 1] : null;
+            const label = previous && previous.getAttribute("aria-label");
+            if (!pattern.test(label || "")) {
+                failures.push(`button ${index + 1} previous sibling aria-label mismatch: expected /${spec.expectedPreviousSiblingAriaLabelPattern}/, got ${JSON.stringify(label)}`);
+            }
+        });
+    }
 
     return { name: spec.name, failures };
 }
