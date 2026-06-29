@@ -65,7 +65,9 @@
     // Context handed to each site's inject().
     const ctx = {
         get strings() { return strings; },
+        get debugBuildId() { return VX.DEBUG_BUILD_ID; },
         convert: (url) => VX.convert(url, settings),
+        debugConvert: (url) => VX.debugConvertDetails(url, settings),
         toast,
         makeBtn,
         async copyUrl(url) {
@@ -74,7 +76,9 @@
                 console.debug("[VX DEBUG] copyUrl prepared", {
                     input: String(url),
                     converted,
+                    debugBuildId: VX.DEBUG_BUILD_ID,
                     bilibiliSettings: settings && settings.sites && settings.sites.bilibili,
+                    convertDetails: VX.debugConvertDetails(url, settings),
                     settings
                 });
             }

@@ -316,21 +316,6 @@
         "aid",        // video ID (avid)
         "bvid"        // video ID (bvid)
     ]);
-    const forceBilibiliShareUrl = (url) => {
-        try {
-            const u = new URL(url);
-            const h = u.hostname.replace(/^www\./, "");
-            if (h !== "bilibili.com" && !h.endsWith(".bilibili.com")) return null;
-            [...u.searchParams.keys()].forEach((k) => {
-                if (!BILI_ALLOWED.has(k)) u.searchParams.delete(k);
-            });
-            u.hash = "";
-            u.hostname = "vxbilibili.com";
-            return u.toString().replace(/\/+$/, "");
-        } catch (e) {
-            return null;
-        }
-    };
     VX.registerSite({
         key: "bilibili",
         match: (h) => h === "bilibili.com" || h.endsWith(".bilibili.com"),
@@ -357,8 +342,10 @@
             }
             if (document.querySelector("[data-vxbtn-bili]")) return;
             console.debug("[VX DEBUG][bilibili] injecting VX button", {
+                debugBuildId: ctx.debugBuildId,
                 href: location.href,
                 converted: ctx.convert(location.href),
+                convertDetails: ctx.debugConvert(location.href),
                 shareItemClass: shareItem.className || ""
             });
 
@@ -388,16 +375,14 @@
                 if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
                 const raw = location.href;
                 const converted = ctx.convert(raw);
-                const forced = forceBilibiliShareUrl(raw);
-                const finalUrl = converted === raw && forced && forced !== raw ? forced : converted;
+                const convertDetails = ctx.debugConvert(raw);
                 console.debug("[VX DEBUG][bilibili] VX click", {
+                    debugBuildId: ctx.debugBuildId,
                     raw,
                     converted,
-                    forced,
-                    finalUrl,
-                    usedFallback: finalUrl !== converted
+                    convertDetails
                 });
-                Promise.resolve(ctx.copyUrl(finalUrl))
+                Promise.resolve(ctx.copyUrl(converted))
                     .then((written) => console.debug("[VX DEBUG][bilibili] copyUrl resolved", { written }))
                     .catch((error) => console.error("[VX DEBUG][bilibili] copyUrl failed", error));
             }, true);

@@ -366,7 +366,9 @@ function runFixture(spec, VX) {
         copyUrl(url) {
             copied.push(VX.convert(url));
         },
+        debugBuildId: VX.DEBUG_BUILD_ID,
         convert: (url) => VX.convert(url),
+        debugConvert: (url) => VX.debugConvertDetails(url),
         toast() {}
     };
 
