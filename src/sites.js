@@ -341,11 +341,13 @@
                 return;
             }
             if (document.querySelector("[data-vxbtn-bili]")) return;
+            const injectDetails = ctx.debugConvert(location.href);
             console.debug("[VX DEBUG][bilibili] injecting VX button", {
                 debugBuildId: ctx.debugBuildId,
                 href: location.href,
                 converted: ctx.convert(location.href),
-                convertDetails: ctx.debugConvert(location.href),
+                convertSummary: injectDetails.summary,
+                convertDetails: injectDetails,
                 shareItemClass: shareItem.className || ""
             });
 
@@ -380,6 +382,7 @@
                     debugBuildId: ctx.debugBuildId,
                     raw,
                     converted,
+                    convertSummary: convertDetails.summary,
                     convertDetails
                 });
                 Promise.resolve(ctx.copyUrl(converted))
