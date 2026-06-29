@@ -242,12 +242,15 @@ function parseSimpleSelector(part) {
         });
 
     let tag = null;
+    let id = null;
     const classes = [];
+    const idRe = /#([A-Za-z0-9_-]+)/g;
+    part = part.replace(idRe, (_, value) => { id = value; return ""; });
     const classRe = /\.([A-Za-z0-9_-]+)/g;
     part = part.replace(classRe, (_, cls) => { classes.push(cls); return ""; });
     const trimmed = part.trim();
     if (trimmed && trimmed !== "*") tag = trimmed.toLowerCase();
-    return { tag, classes, attrMatchers, nthChild };
+    return { tag, id, classes, attrMatchers, nthChild };
 }
 
 function matchesComplexSelector(el, tokens) {
@@ -273,6 +276,7 @@ function matchToken(el, tokens, idx) {
 function matchesSimple(el, simple) {
     if (!(el instanceof MiniElement)) return false;
     if (simple.tag && el.tagName !== simple.tag) return false;
+    if (simple.id && el.getAttribute("id") !== simple.id) return false;
     if (simple.nthChild !== null) {
         if (!el.parentElement) return false;
         const elementSiblings = el.parentElement.children.filter((child) => child.nodeType === 1);

@@ -138,6 +138,12 @@
                 || scope.shadowRoot?.querySelector("[data-rxbtn]")
             );
 
+            const isShareControl = (el) => {
+                if (!el) return false;
+                const name = (el.getAttribute("aria-label") || el.textContent || "").trim().toLowerCase();
+                return /\bshare\b/.test(name) && !/\bshared\b/.test(name);
+            };
+
             const addButton = (anchor, url, scope) => {
                 if (!anchor || hasButton(scope)) return;
                 const b = ctx.makeBtn(ctx.strings.btnVX, () => ctx.copyUrl(url));
@@ -204,6 +210,7 @@
                     || feedShareSlot(post)
                     || post.querySelector("shreddit-post-share-button")
                     || post.querySelector('button[data-testid="share"]')
+                    || [...post.querySelectorAll("button, a")].find(isShareControl)
                     // Home feed SSR can omit the action/share row entirely; the
                     // per-post overflow menu is still present and is a stable,
                     // item-scoped anchor, similar to X/Twitter's per-article
@@ -328,28 +335,35 @@
                 ?.closest(".toolbar-left-item-wrap");
             if (!shareItem || document.querySelector("[data-vxbtn-bili]")) return;
 
-            const clone = shareItem.cloneNode(true);
-            clone.setAttribute("data-vxbtn-bili", "1");
-            clone.querySelectorAll(".van-popover").forEach((e) => e.remove());
+            const wrapper = document.createElement("div");
+            wrapper.className = shareItem.className || "toolbar-left-item-wrap";
+            wrapper.setAttribute("data-vxbtn-bili", "1");
 
-            const shareBtn = clone.querySelector("#share-btn-outer");
-            if (!shareBtn) return;
+            const shareBtn = document.createElement("button");
+            shareBtn.textContent = ctx.strings.btnVX;
             shareBtn.id = "vx-share-btn";
-            shareBtn.removeAttribute("aria-describedby");
-
-            const text = shareBtn.querySelector(".video-share-info-text");
-            if (text) text.textContent = ctx.strings.btnVX;
-            const icon = shareBtn.querySelector("svg");
-            if (icon) icon.remove();
-
-            shareBtn.style.cursor = "pointer";
+            shareBtn.type = "button";
+            shareBtn.style.cssText = `
+                display:inline-flex;
+                align-items:center;
+                justify-content:center;
+                cursor:pointer;
+                opacity:1;
+                color:inherit;
+                background:transparent;
+                border:0;
+                padding:0;
+                font:inherit;
+            `;
             shareBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                ctx.copyUrl(location.href);
-            });
+                if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+                ctx.copyUrl(ctx.convert(location.href));
+            }, true);
 
-            shareItem.insertAdjacentElement("afterend", clone);
+            wrapper.appendChild(shareBtn);
+            shareItem.insertAdjacentElement("afterend", wrapper);
         },
         meta: {
             defaultEnabled: true,
