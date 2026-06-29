@@ -68,17 +68,20 @@
         get debugBuildId() { return VX.DEBUG_BUILD_ID; },
         convert: (url) => VX.convert(url, settings),
         debugConvert: (url) => VX.debugConvertDetails(url, settings),
+        debugConvertSummary: (url) => VX.debugConvertDetails(url, settings).summary,
         toast,
         makeBtn,
         async copyUrl(url) {
             const converted = VX.convert(url, settings);
             if (/bilibili|vxbilibili|b23\.tv|vxb23\.tv/i.test(`${url} ${converted}`)) {
+                const convertDetails = VX.debugConvertDetails(url, settings);
                 console.debug("[VX DEBUG] copyUrl prepared", {
                     input: String(url),
                     converted,
                     debugBuildId: VX.DEBUG_BUILD_ID,
                     bilibiliSettings: settings && settings.sites && settings.sites.bilibili,
-                    convertDetails: VX.debugConvertDetails(url, settings),
+                    convertSummary: convertDetails.summary,
+                    convertDetails,
                     settings
                 });
             }

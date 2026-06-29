@@ -503,18 +503,45 @@ const VX = {
                 details.afterRewrite = u.toString();
                 details.transformed = !!siteSettings.cleanTracking || !!replacementKey;
                 details.output = details.transformed ? u.toString().replace(/\/+$/, "") : u.toString();
+                details.summary = VX.flattenConvertDetails(details);
                 return details;
             }
 
             details.beforeGlobalClean = u.toString();
             VX.GLOBAL_TRACKERS.forEach(p => u.searchParams.delete(p));
             details.output = u.toString();
+            details.summary = VX.flattenConvertDetails(details);
             return details;
         } catch (e) {
             details.error = String(e && e.message || e);
             details.output = url;
+            details.summary = VX.flattenConvertDetails(details);
             return details;
         }
+    },
+
+    flattenConvertDetails(details) {
+        const normalized = details && details.normalizedSiteSettings || {};
+        return {
+            buildId: details && details.buildId,
+            input: details && details.input,
+            output: details && details.output,
+            matchedSiteKey: details && details.matchedSiteKey,
+            registeredSites: details && details.registeredSites,
+            matchSteps: details && details.steps,
+            normalizedHost: details && details.parsed && details.parsed.normalizedHost,
+            pathname: details && details.parsed && details.parsed.pathname,
+            search: details && details.parsed && details.parsed.search,
+            rawSiteSettings: details && details.rawSiteSettings,
+            replaceDomain: normalized.replaceDomain,
+            cleanTracking: normalized.cleanTracking,
+            replacementKey: details && details.replacementKey,
+            beforeClean: details && details.beforeClean,
+            afterClean: details && details.afterClean,
+            afterRewrite: details && details.afterRewrite,
+            transformed: details && details.transformed,
+            error: details && details.error
+        };
     },
 
     // Initialize background context menu and storage listeners

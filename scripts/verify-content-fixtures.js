@@ -369,6 +369,7 @@ function runFixture(spec, VX) {
         debugBuildId: VX.DEBUG_BUILD_ID,
         convert: (url) => VX.convert(url),
         debugConvert: (url) => VX.debugConvertDetails(url),
+        debugConvertSummary: (url) => VX.debugConvertDetails(url).summary,
         toast() {}
     };
 
