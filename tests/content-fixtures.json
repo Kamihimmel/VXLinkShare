@@ -10,6 +10,18 @@
     "expectedCopies": [
       "https://vxreddit.com/r/pics/comments/abc123/first_fixture_post",
       "https://vxreddit.com/r/videos/comments/def456/second_fixture_post"
+    ],
+    "expectedPreviousSiblingAriaLabelPattern": "^Share(?: post)?$"
+  },
+  {
+    "name": "Bilibili video page VX button copies converted URL",
+    "fixture": "tests/fixtures/bilibili-video-page.html",
+    "url": "https://www.bilibili.com/video/BV1CbTG64EMD/?spm_id_from=333.1007.tianma.2-3-6.click&vd_source=50dc6a8852ed11cf357c7f471ecc9119",
+    "site": "bilibili",
+    "buttonSelector": "[data-vxbtn-bili] button",
+    "expectedButtons": 1,
+    "expectedCopies": [
+      "https://vxbilibili.com/video/BV1CbTG64EMD"
     ]
   },
   {
