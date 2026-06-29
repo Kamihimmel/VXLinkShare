@@ -342,8 +342,10 @@
             }
             if (document.querySelector("[data-vxbtn-bili]")) return;
             console.debug("[VX DEBUG][bilibili] injecting VX button", {
+                debugBuildId: ctx.debugBuildId,
                 href: location.href,
                 converted: ctx.convert(location.href),
+                convertDetails: ctx.debugConvert(location.href),
                 shareItemClass: shareItem.className || ""
             });
 
@@ -373,7 +375,13 @@
                 if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
                 const raw = location.href;
                 const converted = ctx.convert(raw);
-                console.debug("[VX DEBUG][bilibili] VX click", { raw, converted });
+                const convertDetails = ctx.debugConvert(raw);
+                console.debug("[VX DEBUG][bilibili] VX click", {
+                    debugBuildId: ctx.debugBuildId,
+                    raw,
+                    converted,
+                    convertDetails
+                });
                 Promise.resolve(ctx.copyUrl(converted))
                     .then((written) => console.debug("[VX DEBUG][bilibili] copyUrl resolved", { written }))
                     .catch((error) => console.error("[VX DEBUG][bilibili] copyUrl failed", error));

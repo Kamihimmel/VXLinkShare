@@ -5,6 +5,8 @@
 // VX.registerSite(). The core just dispatches to that registry.
 
 const VX = {
+    DEBUG_BUILD_ID: "bilibili-debug-v2-2026-06-29",
+
     // Default settings. `sites` is populated by registerSite() from each site's
     // metadata, so adding a site needs no edit here. Each site setting can
     // independently control domain replacement and tracking cleanup.
@@ -448,6 +450,70 @@ const VX = {
             return u.toString();
         } catch (e) {
             return url;
+        }
+    },
+
+    debugConvertDetails(url, settingsOverride = null) {
+        const details = {
+            buildId: VX.DEBUG_BUILD_ID,
+            input: String(url),
+            settingsOverride,
+            registeredSites: VX.sites.map((site) => site && site.key),
+            steps: []
+        };
+        try {
+            const u = new URL(url);
+            const h = u.hostname.replace(/^www\./, "");
+            details.parsed = {
+                href: u.href,
+                hostname: u.hostname,
+                normalizedHost: h,
+                pathname: u.pathname,
+                search: u.search
+            };
+
+            const site = VX.sites.find(s => {
+                try {
+                    const matched = !!(s.match && s.match(h, u));
+                    details.steps.push({ siteKey: s.key, match: matched });
+                    return matched;
+                } catch (e) {
+                    details.steps.push({ siteKey: s.key, match: false, error: String(e && e.message || e) });
+                    return false;
+                }
+            });
+            details.matchedSiteKey = site && site.key || null;
+
+            if (site) {
+                const rawSiteSettings = settingsOverride && settingsOverride.sites && settingsOverride.sites[site.key];
+                const siteSettings = VX.normalizeSiteSettings(site, rawSiteSettings);
+                details.rawSiteSettings = rawSiteSettings;
+                details.normalizedSiteSettings = siteSettings;
+                details.beforeClean = u.toString();
+                if (siteSettings.cleanTracking) {
+                    VX.GLOBAL_TRACKERS.forEach(p => u.searchParams.delete(p));
+                    VX.SITE_TRACKERS.forEach(p => u.searchParams.delete(p));
+                    if (site.clean) site.clean(u, h);
+                    u.hash = "";
+                }
+                details.afterClean = u.toString();
+                const replacementKey = VX.getActiveReplacementKey(site, siteSettings);
+                details.replacementKey = replacementKey;
+                if (replacementKey && site.rewrite) site.rewrite(u, h, { replacement: replacementKey });
+                details.afterRewrite = u.toString();
+                details.transformed = !!siteSettings.cleanTracking || !!replacementKey;
+                details.output = details.transformed ? u.toString().replace(/\/+$/, "") : u.toString();
+                return details;
+            }
+
+            details.beforeGlobalClean = u.toString();
+            VX.GLOBAL_TRACKERS.forEach(p => u.searchParams.delete(p));
+            details.output = u.toString();
+            return details;
+        } catch (e) {
+            details.error = String(e && e.message || e);
+            details.output = url;
+            return details;
         }
     },
 
