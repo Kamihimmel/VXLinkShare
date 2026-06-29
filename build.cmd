@@ -11,12 +11,18 @@ if "%~1"=="--auto-version" (
 )
 if not "%VX_AUTO_VERSION%"=="" set AUTO_VERSION=%VX_AUTO_VERSION%
 if not "%AUTO_VERSION%"=="" (
-    node scripts\bump-version.js %AUTO_VERSION%
+    powershell -NoProfile -ExecutionPolicy Bypass -File scripts\bump-version.ps1 %AUTO_VERSION%
+    if errorlevel 1 exit /b 1
 )
 
-for /f "delims=" %%V in ('node -p "require('./firefox/manifest.json').version"') do set VERSION=%%V
+for /f "tokens=2 delims=:" %%V in ('findstr /c:"\"version\"" firefox\manifest.json') do set VERSION=%%V
+set VERSION=%VERSION:"=%
+set VERSION=%VERSION:,=%
+set VERSION=%VERSION: =%
+
 echo VXLinkShare version: %VERSION%
 echo Trigger: build
+echo Building VXLinkShare extensions...
 
 if exist clean.cmd call clean.cmd --quiet
 
@@ -39,6 +45,8 @@ for %%T in (chrome firefox safari) do (
     copy /y src\icon96.png %%T\icon96.png >nul
     if exist %%T\_locales rmdir /s /q %%T\_locales
     xcopy /e /i /y src\_locales %%T\_locales >nul
+    echo Copied shared assets to %%T/
 )
 
+echo Build completed successfully!
 echo Trigger: build-complete
