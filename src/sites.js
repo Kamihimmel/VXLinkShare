@@ -324,7 +324,12 @@
         },
         clean: (u) => {
             // Whitelist: keep only params that identify the video/episode.
-            [...u.searchParams.keys()].forEach((k) => {
+            // Firefox content scripts can expose URLSearchParams#keys() as a
+            // non-iterable object, so collect keys via forEach instead of
+            // spreading keys().
+            const keys = [];
+            u.searchParams.forEach((_, k) => keys.push(k));
+            keys.forEach((k) => {
                 if (!BILI_ALLOWED.has(k)) u.searchParams.delete(k);
             });
         },
