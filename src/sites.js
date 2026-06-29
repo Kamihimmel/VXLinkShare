@@ -316,6 +316,21 @@
         "aid",        // video ID (avid)
         "bvid"        // video ID (bvid)
     ]);
+    const forceBilibiliShareUrl = (url) => {
+        try {
+            const u = new URL(url);
+            const h = u.hostname.replace(/^www\./, "");
+            if (h !== "bilibili.com" && !h.endsWith(".bilibili.com")) return null;
+            [...u.searchParams.keys()].forEach((k) => {
+                if (!BILI_ALLOWED.has(k)) u.searchParams.delete(k);
+            });
+            u.hash = "";
+            u.hostname = "vxbilibili.com";
+            return u.toString().replace(/\/+$/, "");
+        } catch (e) {
+            return null;
+        }
+    };
     VX.registerSite({
         key: "bilibili",
         match: (h) => h === "bilibili.com" || h.endsWith(".bilibili.com"),
@@ -373,8 +388,16 @@
                 if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
                 const raw = location.href;
                 const converted = ctx.convert(raw);
-                console.debug("[VX DEBUG][bilibili] VX click", { raw, converted });
-                Promise.resolve(ctx.copyUrl(converted))
+                const forced = forceBilibiliShareUrl(raw);
+                const finalUrl = converted === raw && forced && forced !== raw ? forced : converted;
+                console.debug("[VX DEBUG][bilibili] VX click", {
+                    raw,
+                    converted,
+                    forced,
+                    finalUrl,
+                    usedFallback: finalUrl !== converted
+                });
+                Promise.resolve(ctx.copyUrl(finalUrl))
                     .then((written) => console.debug("[VX DEBUG][bilibili] copyUrl resolved", { written }))
                     .catch((error) => console.error("[VX DEBUG][bilibili] copyUrl failed", error));
             }, true);

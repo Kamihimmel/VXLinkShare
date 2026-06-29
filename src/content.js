@@ -74,6 +74,7 @@
                 console.debug("[VX DEBUG] copyUrl prepared", {
                     input: String(url),
                     converted,
+                    bilibiliSettings: settings && settings.sites && settings.sites.bilibili,
                     settings
                 });
             }
