@@ -154,7 +154,7 @@
                     justify-content:center;
                     min-height:32px;
                     padding:0 8px;
-                    margin-left:0;
+                    margin-left:8px;
                     border-radius:999px;
                     background:var(--color-secondary-background, rgba(255,255,255,.10));
                     color:var(--color-neutral-content-strong, currentColor);
@@ -333,7 +333,19 @@
             const shareItem = document
                 .querySelector("#share-btn-outer")
                 ?.closest(".toolbar-left-item-wrap");
-            if (!shareItem || document.querySelector("[data-vxbtn-bili]")) return;
+            if (!shareItem) {
+                console.debug("[VX DEBUG][bilibili] inject skipped", {
+                    hasShareItem: false,
+                    href: location.href
+                });
+                return;
+            }
+            if (document.querySelector("[data-vxbtn-bili]")) return;
+            console.debug("[VX DEBUG][bilibili] injecting VX button", {
+                href: location.href,
+                converted: ctx.convert(location.href),
+                shareItemClass: shareItem.className || ""
+            });
 
             const wrapper = document.createElement("div");
             wrapper.className = shareItem.className || "toolbar-left-item-wrap";
@@ -359,7 +371,12 @@
                 e.preventDefault();
                 e.stopPropagation();
                 if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
-                ctx.copyUrl(ctx.convert(location.href));
+                const raw = location.href;
+                const converted = ctx.convert(raw);
+                console.debug("[VX DEBUG][bilibili] VX click", { raw, converted });
+                Promise.resolve(ctx.copyUrl(converted))
+                    .then((written) => console.debug("[VX DEBUG][bilibili] copyUrl resolved", { written }))
+                    .catch((error) => console.error("[VX DEBUG][bilibili] copyUrl failed", error));
             }, true);
 
             wrapper.appendChild(shareBtn);
