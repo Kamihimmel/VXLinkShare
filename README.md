@@ -66,10 +66,12 @@ This repository ships unpacked extension targets for developer-mode loading. The
 ```bash
 # macOS / Linux
 ./build.sh
+./build.sh --auto-version patch  # store upload: bump manifests before building
 ./clean.sh
 
 # Windows
 build.cmd
+build.cmd --auto-version patch
 clean.cmd
 ```
 

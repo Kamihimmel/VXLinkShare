@@ -1,10 +1,25 @@
 #!/bin/bash
-# Automatically clean previous build products
-if [ -f "./clean.sh" ]; then
-    ./clean.sh
+set -e
+
+AUTO_VERSION=""
+if [ "${1:-}" = "--auto-version" ]; then
+    AUTO_VERSION="${2:-patch}"
+elif [ -n "${VX_AUTO_VERSION:-}" ]; then
+    AUTO_VERSION="$VX_AUTO_VERSION"
 fi
 
-echo "Building VXLinkShare extensions..."
+if [ -n "$AUTO_VERSION" ]; then
+    node scripts/bump-version.js "$AUTO_VERSION"
+fi
+
+VERSION=$(node -p "require('./firefox/manifest.json').version")
+echo "VXLinkShare version: $VERSION"
+echo "Trigger: build"
+
+# Automatically clean previous build products
+if [ -f "./clean.sh" ]; then
+    ./clean.sh --quiet
+fi
 
 # Ensure target directories exist
 mkdir -p chrome firefox safari
@@ -25,7 +40,6 @@ for target in chrome firefox safari; do
     cp src/icon96.png "$target/icon96.png"
     rm -rf "$target/_locales"
     cp -R src/_locales "$target/_locales"
-    echo "Copied shared assets to $target/"
 done
 
-echo "Build completed successfully!"
+echo "Trigger: build-complete"

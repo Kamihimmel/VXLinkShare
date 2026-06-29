@@ -338,23 +338,9 @@
             const shareItem = document
                 .querySelector("#share-btn-outer")
                 ?.closest(".toolbar-left-item-wrap");
-            if (!shareItem) {
-                console.debug("[VX DEBUG][bilibili] inject skipped", {
-                    hasShareItem: false,
-                    href: location.href
-                });
-                return;
-            }
+            if (!shareItem) return;
             if (document.querySelector("[data-vxbtn-bili]")) return;
-            const injectDetails = ctx.debugConvert(location.href);
-            console.debug("[VX DEBUG][bilibili] injecting VX button", {
-                debugBuildId: ctx.debugBuildId,
-                href: location.href,
-                converted: ctx.convert(location.href),
-                convertSummary: injectDetails.summary,
-                convertDetails: injectDetails,
-                shareItemClass: shareItem.className || ""
-            });
+            if (ctx.logTrigger) ctx.logTrigger("bilibili:button-injected");
 
             const wrapper = document.createElement("div");
             wrapper.className = shareItem.className || "toolbar-left-item-wrap";
@@ -382,17 +368,10 @@
                 if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
                 const raw = location.href;
                 const converted = ctx.convert(raw);
-                const convertDetails = ctx.debugConvert(raw);
-                console.debug("[VX DEBUG][bilibili] VX click", {
-                    debugBuildId: ctx.debugBuildId,
-                    raw,
-                    converted,
-                    convertSummary: convertDetails.summary,
-                    convertDetails
-                });
+                if (ctx.logTrigger) ctx.logTrigger("bilibili:button-click");
                 Promise.resolve(ctx.copyUrl(converted))
-                    .then((written) => console.debug("[VX DEBUG][bilibili] copyUrl resolved", { written }))
-                    .catch((error) => console.error("[VX DEBUG][bilibili] copyUrl failed", error));
+                    .then(() => { if (ctx.logTrigger) ctx.logTrigger("bilibili:copy-complete"); })
+                    .catch(() => { if (ctx.logTrigger) ctx.logTrigger("bilibili:copy-failed"); });
             }, true);
 
             wrapper.appendChild(shareBtn);

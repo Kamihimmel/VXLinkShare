@@ -5,8 +5,6 @@
 // VX.registerSite(). The core just dispatches to that registry.
 
 const VX = {
-    DEBUG_BUILD_ID: "bilibili-debug-v2-2026-06-29",
-
     // Default settings. `sites` is populated by registerSite() from each site's
     // metadata, so adding a site needs no edit here. Each site setting can
     // independently control domain replacement and tracking cleanup.
