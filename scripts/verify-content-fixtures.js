@@ -410,6 +410,16 @@ function runFixture(spec, VX) {
             }
         });
     }
+    if (spec.expectedButtonStyleIncludes) {
+        buttons.forEach((button, index) => {
+            const styleText = button.style && button.style.cssText || "";
+            for (const expected of spec.expectedButtonStyleIncludes) {
+                if (!styleText.includes(expected)) {
+                    failures.push(`button ${index + 1} style missing ${JSON.stringify(expected)} in ${JSON.stringify(styleText)}`);
+                }
+            }
+        });
+    }
 
     return { name: spec.name, failures };
 }

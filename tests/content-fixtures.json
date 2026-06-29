@@ -11,7 +11,8 @@
       "https://vxreddit.com/r/pics/comments/abc123/first_fixture_post",
       "https://vxreddit.com/r/videos/comments/def456/second_fixture_post"
     ],
-    "expectedPreviousSiblingAriaLabelPattern": "^Share(?: post)?$"
+    "expectedPreviousSiblingAriaLabelPattern": "^Share(?: post)?$",
+    "expectedButtonStyleIncludes": ["margin-left:8px"]
   },
   {
     "name": "Bilibili video page VX button copies converted URL",

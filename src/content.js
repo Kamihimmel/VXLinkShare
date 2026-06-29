@@ -69,8 +69,25 @@
         toast,
         makeBtn,
         async copyUrl(url) {
-            await navigator.clipboard.writeText(VX.convert(url, settings));
+            const converted = VX.convert(url, settings);
+            if (/bilibili|vxbilibili|b23\.tv|vxb23\.tv/i.test(`${url} ${converted}`)) {
+                console.debug("[VX DEBUG] copyUrl prepared", {
+                    input: String(url),
+                    converted,
+                    settings
+                });
+            }
+            await navigator.clipboard.writeText(converted);
+            if (/bilibili|vxbilibili|b23\.tv|vxb23\.tv/i.test(`${url} ${converted}`)) {
+                try {
+                    const clipboardText = await navigator.clipboard.readText();
+                    console.debug("[VX DEBUG] clipboard after write", { clipboardText });
+                } catch (e) {
+                    console.debug("[VX DEBUG] clipboard readback unavailable", String(e && e.message || e));
+                }
+            }
             toast(strings.toastCopied);
+            return converted;
         }
     };
 
