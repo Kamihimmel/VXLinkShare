@@ -12,9 +12,15 @@ if [ -n "$AUTO_VERSION" ]; then
     node scripts/bump-version.js "$AUTO_VERSION"
 fi
 
-VERSION=$(node -p "require('./firefox/manifest.json').version")
+VERSION=$(python3 - <<'PY'
+import json
+with open('firefox/manifest.json', encoding='utf-8') as f:
+    print(json.load(f)['version'])
+PY
+)
 echo "VXLinkShare version: $VERSION"
 echo "Trigger: build"
+echo "Building VXLinkShare extensions..."
 
 # Automatically clean previous build products
 if [ -f "./clean.sh" ]; then
@@ -40,6 +46,8 @@ for target in chrome firefox safari; do
     cp src/icon96.png "$target/icon96.png"
     rm -rf "$target/_locales"
     cp -R src/_locales "$target/_locales"
+    echo "Copied shared assets to $target/"
 done
 
+echo "Build completed successfully!"
 echo "Trigger: build-complete"

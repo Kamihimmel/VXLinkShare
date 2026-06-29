@@ -7,9 +7,15 @@ if [ "${1:-}" = "--quiet" ]; then
 fi
 
 if [ -z "$QUIET" ]; then
-    VERSION=$(node -p "require('./firefox/manifest.json').version" 2>/dev/null || printf 'unknown')
+    VERSION=$(python3 - <<'PY' 2>/dev/null || printf 'unknown'
+import json
+with open('firefox/manifest.json', encoding='utf-8') as f:
+    print(json.load(f)['version'])
+PY
+)
     echo "VXLinkShare version: $VERSION"
     echo "Trigger: clean"
+    echo "Cleaning generated extension files..."
 fi
 
 for target in chrome firefox safari; do
@@ -26,8 +32,12 @@ for target in chrome firefox safari; do
           "$target/icon64.png"   \
           "$target/icon96.png"
     rm -rf "$target/_locales"
+    if [ -z "$QUIET" ]; then
+        echo "Cleaned generated assets from $target/"
+    fi
 done
 
 if [ -z "$QUIET" ]; then
+    echo "Clean completed successfully!"
     echo "Trigger: clean-complete"
 fi

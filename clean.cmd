@@ -1,13 +1,17 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 set QUIET=
 if "%~1"=="--quiet" set QUIET=1
 
 if "%QUIET%"=="" (
-    for /f "delims=" %%V in ('node -p "require('./firefox/manifest.json').version" 2^>nul') do set VERSION=%%V
-    if "%VERSION%"=="" set VERSION=unknown
-    echo VXLinkShare version: %VERSION%
+    for /f "tokens=2 delims=:" %%V in ('findstr /c:"\"version\"" firefox\manifest.json 2^>nul') do set VERSION=%%V
+    set VERSION=!VERSION:"=!
+    set VERSION=!VERSION:,=!
+    set VERSION=!VERSION: =!
+    if "!VERSION!"=="" set VERSION=unknown
+    echo VXLinkShare version: !VERSION!
     echo Trigger: clean
+    echo Cleaning generated extension files...
 )
 
 for %%T in (chrome firefox safari) do (
@@ -24,8 +28,10 @@ for %%T in (chrome firefox safari) do (
     if exist %%T\icon64.png del /q %%T\icon64.png
     if exist %%T\icon96.png del /q %%T\icon96.png
     if exist %%T\_locales rmdir /s /q %%T\_locales
+    if "%QUIET%"=="" echo Cleaned generated assets from %%T/
 )
 
 if "%QUIET%"=="" (
+    echo Clean completed successfully!
     echo Trigger: clean-complete
 )
