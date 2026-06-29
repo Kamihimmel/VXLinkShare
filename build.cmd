@@ -1,8 +1,24 @@
 @echo off
-rem Automatically clean previous build products
-if exist clean.cmd call clean.cmd
+setlocal enabledelayedexpansion
 
-echo Building VXLinkShare extensions...
+set AUTO_VERSION=
+if "%~1"=="--auto-version" (
+    if "%~2"=="" (
+        set AUTO_VERSION=patch
+    ) else (
+        set AUTO_VERSION=%~2
+    )
+)
+if not "%VX_AUTO_VERSION%"=="" set AUTO_VERSION=%VX_AUTO_VERSION%
+if not "%AUTO_VERSION%"=="" (
+    node scripts\bump-version.js %AUTO_VERSION%
+)
+
+for /f "delims=" %%V in ('node -p "require('./firefox/manifest.json').version"') do set VERSION=%%V
+echo VXLinkShare version: %VERSION%
+echo Trigger: build
+
+if exist clean.cmd call clean.cmd --quiet
 
 if not exist chrome mkdir chrome
 if not exist firefox mkdir firefox
@@ -20,10 +36,9 @@ for %%T in (chrome firefox safari) do (
     copy /y src\icon32.png %%T\icon32.png >nul
     copy /y src\icon48.png %%T\icon48.png >nul
     copy /y src\icon64.png %%T\icon64.png >nul
-    copy /y src\icon96.png %%T\icon96.png >nul 
+    copy /y src\icon96.png %%T\icon96.png >nul
     if exist %%T\_locales rmdir /s /q %%T\_locales
     xcopy /e /i /y src\_locales %%T\_locales >nul
-    echo Copied shared assets to %%T/
 )
 
-echo Build completed successfully!
+echo Trigger: build-complete

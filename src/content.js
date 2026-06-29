@@ -63,37 +63,32 @@
     }
 
     // Context handed to each site's inject().
+    function getRuntimeVersion() {
+        try {
+            const apis = typeof chrome !== "undefined" ? chrome : (typeof browser !== "undefined" ? browser : null);
+            return apis && apis.runtime && apis.runtime.getManifest
+                ? apis.runtime.getManifest().version
+                : "unknown";
+        } catch (e) {
+            return "unknown";
+        }
+    }
+
     const ctx = {
         get strings() { return strings; },
-        get debugBuildId() { return VX.DEBUG_BUILD_ID; },
+        get version() { return getRuntimeVersion(); },
         convert: (url) => VX.convert(url, settings),
-        debugConvert: (url) => VX.debugConvertDetails(url, settings),
-        debugConvertSummary: (url) => VX.debugConvertDetails(url, settings).summary,
+        logTrigger(trigger) {
+            console.debug("[VX Link Helper]", {
+                version: getRuntimeVersion(),
+                trigger
+            });
+        },
         toast,
         makeBtn,
         async copyUrl(url) {
             const converted = VX.convert(url, settings);
-            if (/bilibili|vxbilibili|b23\.tv|vxb23\.tv/i.test(`${url} ${converted}`)) {
-                const convertDetails = VX.debugConvertDetails(url, settings);
-                console.debug("[VX DEBUG] copyUrl prepared", {
-                    input: String(url),
-                    converted,
-                    debugBuildId: VX.DEBUG_BUILD_ID,
-                    bilibiliSettings: settings && settings.sites && settings.sites.bilibili,
-                    convertSummary: convertDetails.summary,
-                    convertDetails,
-                    settings
-                });
-            }
             await navigator.clipboard.writeText(converted);
-            if (/bilibili|vxbilibili|b23\.tv|vxb23\.tv/i.test(`${url} ${converted}`)) {
-                try {
-                    const clipboardText = await navigator.clipboard.readText();
-                    console.debug("[VX DEBUG] clipboard after write", { clipboardText });
-                } catch (e) {
-                    console.debug("[VX DEBUG] clipboard readback unavailable", String(e && e.message || e));
-                }
-            }
             toast(strings.toastCopied);
             return converted;
         }

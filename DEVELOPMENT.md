@@ -36,6 +36,21 @@ To run or distribute the extensions, you must sync the shared source code to the
         build.cmd
         ```
 
+For store uploads, use the automatic version bump so Firefox/AMO does not reject a package whose manifest version already exists:
+
+```bash
+./build.sh --auto-version patch
+# or: VX_AUTO_VERSION=patch ./build.sh
+```
+
+On Windows:
+
+```cmd
+build.cmd --auto-version patch
+```
+
+The build output is intentionally minimal: it prints the current VXLinkShare version and the build trigger messages only.
+
 ### Cleaning Up Generated Files
 To remove the copied files from the browser-specific directories (leaving only the source manifests), run the platform-specific clean script:
 *   **macOS / Linux**:
