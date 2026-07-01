@@ -128,3 +128,5 @@ VX Link Helper is open source under the **Mozilla Public License 2.0**. See
 The project name and logo are trademarks of the maintainers. The MPL-2.0 license covers
 the source code, but it does not grant permission to present unofficial builds as the
 official VX Link Helper release.
+
+test
